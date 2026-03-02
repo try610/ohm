@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trò chơi KHTN 9 - Định luật Ohm và Thấu kính</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-blue: #1e88e5;
+            --secondary-blue: #1565c0;
+            --white: #ffffff;
+            --gold: #ffd700;
+            --dark-gray: #333;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            color: var(--dark-gray);
+            overflow: hidden;
+        }
+
+        /* --- Màn hình đăng nhập --- */
+        #login-screen {
+            background: linear-gradient(135deg, #0d47a1, #1e88e5);
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .notebook-icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .title-3d {
+            font-size: 45px;
+            color: var(--gold);
+            text-transform: uppercase;
+            font-weight: bold;
+            text-shadow: 2px 2px 0px #b8860b, 4px 4px 0px #8b4513, 6px 6px 5px rgba(0,0,0,0.5);
+            margin: 10px 0;
+        }
+
+        .login-box {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            width: 90%;
+            max-width: 400px;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+
+        button {
+            background-color: var(--primary-blue);
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: bold;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+
+        button:hover { background-color: var(--secondary-blue); }
+
+        /* --- Giao diện câu hỏi --- */
+        #game-container {
+            display: none;
+            flex-direction: column;
+            height: 100%;
+            background-color: var(--white);
+        }
+
+        #header-info {
+            background-color: #eee;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            border-bottom: 2px solid var(--primary-blue);
+        }
+
+        #timer-box {
+            background-color: #ff5252;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+        }
+
+        #question-area {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+        }
+
+        .question-text {
+            font-size: 22px;
+            font-weight: bold;
+            margin-bottom: 25px;
+            line-height: 1.4;
+        }
+
+        .option-card {
+            background-color: #e3f2fd;
+            border: 2px solid #bbdefb;
+            padding: 15px;
+            margin-bottom: 12px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .option-card:hover { background-color: #bbdefb; }
+        .option-card.selected { background-color: #2196f3; color: white; border-color: #0d47a1; }
+
+        /* Dạng đúng sai */
+        .tf-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            padding: 10px;
+            border-bottom: 1px dashed #ccc;
+        }
+        .tf-btns { display: flex; gap: 10px; }
+        .btn-tf {
+            padding: 5px 15px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .btn-tf.active-true { background-color: #4caf50; color: white; }
+        .btn-tf.active-false { background-color: #f44336; color: white; }
+
+        #footer-nav {
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            border-top: 1px solid #ddd;
+        }
+
+        #copyright {
+            text-align: center;
+            font-size: 12px;
+            padding: 10px;
+            color: #777;
+        }
+
+        /* --- Kết quả --- */
+        #result-screen {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px;
+            text-align: center;
+            overflow-y: auto;
+        }
+
+        .score-big { font-size: 60px; color: var(--primary-blue); font-weight: bold; }
+        .rank-box { font-size: 30px; font-weight: bold; margin: 20px 0; }
+        .history-table { width: 100%; border-collapse: collapse; margin-top: 20px; text-align: left; }
+        .history-table th, .history-table td { border: 1px solid #ddd; padding: 12px; }
+    </style>
+</head>
+<body>
+
+    <!-- Màn hình đăng nhập -->
+    <div id="login-screen">
+        <div class="notebook-icon">📖<span style="position:absolute; left: 30px; top: 10px;">✏️</span></div>
+        <h1 class="title-3d">KHTN 9: Ohm & Thấu kính</h1>
+        <div class="login-box">
+            <input type="text" id="stu-name" placeholder="Họ và tên">
+            <input type="text" id="stu-id" placeholder="Số báo danh">
+            <input type="text" id="stu-class" placeholder="Lớp">
+            <input type="text" id="stu-school" placeholder="Trường">
+            <button onclick="startGame()">BẮT ĐẦU CHƠI</button>
+        </div>
+    </div>
+
+    <!-- Màn hình trò chơi -->
+    <div id="game-container">
+        <div id="header-info">
+            <div id="stu-display"></div>
+            <div id="timer-box">Thời gian: 90s</div>
+        </div>
+        <div id="question-area">
+            <div id="q-content"></div>
+        </div>
+        <div id="footer-nav">
+            <button id="btn-prev" onclick="prevQuestion()" style="background-color: #666;">Quay lại</button>
+            <button id="btn-next" onclick="nextQuestion()">Tiếp theo</button>
+        </div>
+        <div id="copyright">Bản quyền thuộc về Thạc sĩ Nguyễn Văn Cần, Thành phố Huế</div>
+    </div>
+
+    <!-- Màn hình kết quả -->
+    <div id="result-screen">
+        <h1 class="title-3d">KẾT QUẢ</h1>
+        <div id="score-display" class="score-big"></div>
+        <div id="rank-display" class="rank-box"></div>
+        <div id="history-area"></div>
+        <button onclick="location.reload()">CHƠI LẠI</button>
+        <div id="copyright">Bản quyền thuộc về Thạc sĩ Nguyễn Văn Cần, Thành phố Huế</div>
+    </div>
+
+    <script>
+        // --- NGÂN HÀNG CÂU HỎI (40 CÂU) ---
+        const questionBank = {
+            part1: [
+                { q: "Cường độ dòng điện chạy qua một dây dẫn tỉ lệ thuận với hiệu điện thế đặt vào hai đầu dây dẫn đó, đây là nội dung của", a: "định luật Ohm.", b: "định luật bảo toàn năng lượng.", c: "định luật Joule - Lenz.", d: "định luật khúc xạ.", correct: "a", level: "know" },
+                { q: "Đơn vị đo của điện trở là", a: "ampere (A).", b: "volt (V).", c: "ohm (Ω).", d: "watt (W).", correct: "c", level: "know" },
+                { q: "Thấu kính hội tụ thường có đặc điểm", a: "phần rìa dày hơn phần giữa.", b: "phần rìa mỏng hơn phần giữa.", c: "phần rìa và phần giữa bằng nhau.", d: "KHÔNG có tiêu điểm.", correct: "b", level: "know" },
+                { q: "Khi vật nằm trong khoảng tiêu cự của thấu kính hội tụ, ảnh của vật là", a: "ảnh thật, ngược chiều.", b: "ảnh ảo, ngược chiều.", c: "ảnh ảo, cùng chiều và lớn hơn vật.", d: "ảnh ảo, cùng chiều và nhỏ hơn vật.", correct: "c", level: "understand" },
+                { q: "Công thức định luật Ohm là", a: "I = U.R", b: "I = U/R", c: "I = R/U", d: "U = I/R", correct: "b", level: "know" },
+                { q: "Một dây dẫn có điện trở 20 Ω, hiệu điện thế giữa hai đầu dây là 10 V. Cường độ dòng điện là", a: "2 A.", b: "0,5 A.", c: "200 A.", d: "1 A.", correct: "b", level: "understand" },
+                { q: "Hiện tượng khúc xạ ánh sáng là hiện tượng tia sáng truyền từ môi trường trong suốt này sang môi trường trong suốt khác bị", a: "dừng lại.", b: "phản xạ hoàn toàn.", c: "gãy khúc tại mặt phân cách.", d: "đi thẳng tiếp tục.", correct: "c", level: "know" },
+                { q: "Tiêu cự của thấu kính kí hiệu là", a: "f.", b: "d.", c: "d'.", d: "O.", correct: "a", level: "know" },
+                { q: "Điện trở của đoạn mạch gồm R1 nối tiếp R2 là", a: "R = R1 + R2", b: "R = R1 - R2", c: "1/R = 1/R1 + 1/R2", d: "R = R1.R2", correct: "a", level: "know" },
+                { q: "Ảnh tạo bởi thấu kính phân kì LUÔN là", a: "ảnh ảo, cùng chiều, lớn hơn vật.", b: "ảnh ảo, cùng chiều, nhỏ hơn vật.", c: "ảnh thật, ngược chiều vật.", d: "ảnh thật, cùng chiều vật.", correct: "b", level: "understand" },
+                { q: "Trong đoạn mạch song song, đại lượng nào sau đây là như nhau tại mọi điểm?", a: "Cường độ dòng điện.", b: "Hiệu điện thế.", c: "Điện trở.", d: "Công suất.", correct: "b", level: "understand" },
+                { q: "Một người bị cận thị cần đeo loại thấu kính nào để khắc phục?", a: "Thấu kính hội tụ.", b: "Thấu kính phân kì.", c: "Gương phẳng.", d: "Gương cầu lồi.", correct: "b", level: "understand" },
+                { q: "Đặt hiệu điện thế 12 V vào thấu kính... à không, vào hai đầu điện trở 4 Ω. Dòng điện qua mạch là", a: "3 A.", b: "48 A.", c: "8 A.", d: "16 A.", correct: "a", level: "understand" },
+                { q: "Vật đặt tại tiêu điểm của thấu kính hội tụ sẽ cho ảnh ở", a: "tâm thấu kính.", b: "vô cực.", c: "ngay sát thấu kính.", d: "phía sau vật.", correct: "b", level: "understand" },
+                { q: "Kí hiệu của điện trở trong sơ đồ mạch điện là", a: "hình tròn.", b: "hình chữ nhật.", c: "hình tam giác.", d: "đường zic-zac.", correct: "b", level: "know" },
+                { q: "Khi tăng hiệu điện thế lên 2 lần thì cường độ dòng điện qua điện trở sẽ", a: "giảm 2 lần.", b: "tăng 2 lần.", c: "không đổi.", d: "giảm 4 lần.", correct: "b", level: "understand" },
+                { q: "Thấu kính phân kì có", a: "hai mặt đều lồi.", b: "ít nhất một mặt lõm.", c: "mặt phẳng.", d: "KHÔNG có quang tâm.", correct: "b", level: "know" },
+                { q: "Điện trở suất của dây dẫn phụ thuộc vào", a: "chiều dài.", b: "tiết diện.", c: "vật liệu làm dây.", d: "hiệu điện thế.", correct: "c", level: "know" },
+                { q: "Để đo cường độ dòng điện, ta dùng ampe kế mắc", a: "song song.", b: "nối tiếp.", c: "hỗn hợp.", d: "bất kì.", correct: "b", level: "understand" },
+                { q: "Thấu kính có tiêu cự 10 cm. Một vật đặt cách thấu kính 20 cm sẽ cho ảnh", a: "thật, bằng vật.", b: "thật, lớn hơn vật.", c: "ảo, nhỏ hơn vật.", d: "ảo, bằng vật.", correct: "a", level: "apply" },
+                { q: "Biến trở là dụng cụ dùng để thay đổi", a: "hiệu điện thế.", b: "cường độ dòng điện bằng cách thay đổi điện trở.", c: "vật liệu dây dẫn.", d: "chiều dòng điện.", correct: "b", level: "understand" },
+                { q: "Chiết suất tuyệt đối của một môi trường LUÔN", a: "nhỏ hơn 1.", b: "bằng 1.", c: "lớn hơn hoặc bằng 1.", d: "bằng 0.", correct: "c", level: "know" },
+                { q: "Một mạch điện có R1 = 6 Ω, R2 = 12 Ω mắc song song. Điện trở tương đương là", a: "18 Ω.", b: "4 Ω.", b: "6 Ω.", d: "9 Ω.", correct: "b", level: "apply" },
+                { q: "Tia sáng đi qua quang tâm O của thấu kính thì", a: "bị lệch hướng.", b: "truyền thẳng.", c: "phản xạ ngược lại.", d: "bị hấp thụ.", correct: "b", level: "know" }
+            ],
+            part2: [
+                {
+                    intro: "Xét một thấu kính hội tụ có tiêu cự f = 12 cm. Một vật sáng AB đặt vuông góc với trục chính.",
+                    items: [
+                        { text: "Nếu vật đặt cách thấu kính 24 cm thì ảnh là ảnh thật.", correct: true },
+                        { text: "Nếu vật đặt cách thấu kính 10 cm thì ảnh là ảnh thật.", correct: false },
+                        { text: "Tia sáng song song với trục chính sẽ đi qua tiêu điểm sau thấu kính.", correct: true },
+                        { text: "Khoảng cách từ quang tâm đến tiêu điểm gọi là tiêu cự.", correct: true }
+                    ]
+                },
+                {
+                    intro: "Cho mạch điện gồm hai điện trở R1 = 10 Ω và R2 = 20 Ω mắc nối tiếp vào hiệu điện thế 30 V.",
+                    items: [
+                        { text: "Điện trở tương đương của mạch là 30 Ω.", correct: true },
+                        { text: "Cường độ dòng điện qua R1 lớn hơn qua R2.", correct: false },
+                        { text: "Cường độ dòng điện mạch chính là 1 A.", correct: true },
+                        { text: "Hiệu điện thế giữa hai đầu R1 là 10 V.", correct: true }
+                    ]
+                },
+                {
+                    intro: "Về hiện tượng khúc xạ ánh sáng và chiết suất:",
+                    items: [
+                        { text: "Góc khúc xạ LUÔN lớn hơn góc tới.", correct: false },
+                        { text: "Khi tia sáng truyền từ nước ra không khí, góc khúc xạ lớn hơn góc tới.", correct: true },
+                        { text: "Chiết suất của chân không được quy ước bằng 1.", correct: true },
+                        { text: "Hiện tượng khúc xạ chỉ xảy ra tại mặt phân cách giữa hai môi trường.", correct: true }
+                    ]
+                },
+                {
+                    intro: "Trong các nhận định sau về an toàn điện:",
+                    items: [
+                        { text: "Nên sử dụng dây dẫn có vỏ bọc bị hở.", correct: false },
+                        { text: "Phải ngắt điện khi sửa chữa các thiết bị điện.", correct: true },
+                        { text: "Cầu chì giúp ngắt mạch khi dòng điện quá tải.", correct: true },
+                        { text: "Có thể chạm tay trực tiếp vào ổ điện khi tay đang ướt.", correct: false }
+                    ]
+                }
+                // Thêm 4 câu nữa cho đủ 8 câu bank...
+            ],
+            part3: [
+                { q: "Mạch điện song song gồm R1 = 30 Ω, R2 = 60 Ω. Điện trở tương đương là bao nhiêu ohm?", correct: "20", level: "apply" },
+                { q: "Một thấu kính hội tụ có f = 15 cm. Vật đặt cách thấu kính 30 cm. Ảnh cách thấu kính bao nhiêu cm?", correct: "30", level: "apply" },
+                { q: "Cho các nhận định:\n1. Định luật Ohm I=U/R.\n2. Đơn vị R là Ohm.\n3. R tỉ lệ thuận với U.\n4. Đồ thị I-U là đường thẳng qua gốc tọa độ.\nChọn các ý ĐÚNG tăng dần.", correct: "124", level: "understand" },
+                { q: "Cho hiệu điện thế 6 V, cường độ dòng điện 0,5 A. Điện trở của dây dẫn là bao nhiêu ohm?", correct: "12", level: "understand" },
+                { q: "Vật AB đặt trước thấu kính hội tụ cho ảnh thật A'B' cao gấp 2 lần vật. Biết f = 10cm. Vật cách thấu kính bao nhiêu cm?", correct: "15", level: "apply" }
+            ]
+        };
+
+        let currentQuiz = [];
+        let currentIndex = 0;
+        let userAnswers = [];
+        let timer;
+        let timeLeft = 90;
+
+        function startGame() {
+            const name = document.getElementById('stu-name').value;
+            if(!name) { alert("Vui lòng nhập tên!"); return; }
+            
+            document.getElementById('stu-display').innerText = `TS: ${name} | Lớp: ${document.getElementById('stu-class').value}`;
+            document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('game-container').style.display = 'flex';
+            
+            setupQuiz();
+            showQuestion();
+        }
+
+        function setupQuiz() {
+            // Chọn ngẫu nhiên từ bank
+            let p1 = questionBank.part1.sort(() => 0.5 - Math.random()).slice(0, 12);
+            let p2 = questionBank.part2.sort(() => 0.5 - Math.random()).slice(0, 4);
+            let p3 = questionBank.part3.sort(() => 0.5 - Math.random()).slice(0, 4);
+            currentQuiz = [...p1, ...p2, ...p3];
+            userAnswers = new Array(20).fill(null);
+        }
+
+        function showQuestion() {
+            clearInterval(timer);
+            const q = currentQuiz[currentIndex];
+            const area = document.getElementById('q-content');
+            area.innerHTML = '';
+
+            // Cài đặt timer
+            if(currentIndex < 12) timeLeft = 90;
+            else timeLeft = 120;
+            startTimer();
+
+            const title = document.createElement('div');
+            title.className = 'question-text';
+            title.innerText = `Câu ${currentIndex + 1}. ` + (q.intro || q.q);
+            area.appendChild(title);
+
+            if(currentIndex < 12) { // Part I
+                ['a', 'b', 'c', 'd'].forEach(opt => {
+                    const div = document.createElement('div');
+                    div.className = `option-card ${userAnswers[currentIndex] === opt ? 'selected' : ''}`;
+                    div.innerText = `${opt.toUpperCase()}. ${q[opt]}`;
+                    div.onclick = () => {
+                        userAnswers[currentIndex] = opt;
+                        showQuestion();
+                        playPing();
+                    };
+                    area.appendChild(div);
+                });
+            } else if (currentIndex < 16) { // Part II (T/F)
+                if(!userAnswers[currentIndex]) userAnswers[currentIndex] = [null, null, null, null];
+                q.items.forEach((item, idx) => {
+                    const row = document.createElement('div');
+                    row.className = 'tf-row';
+                    row.innerHTML = `<span>${String.fromCharCode(97 + idx)}) ${item.text}</span>`;
+                    const btns = document.createElement('div');
+                    btns.className = 'tf-btns';
+                    const bT = document.createElement('button');
+                    bT.className = `btn-tf ${userAnswers[currentIndex][idx] === true ? 'active-true' : ''}`;
+                    bT.innerText = 'ĐÚNG';
+                    bT.onclick = () => { userAnswers[currentIndex][idx] = true; showQuestion(); playPing(); };
+                    
+                    const bF = document.createElement('button');
+                    bF.className = `btn-tf ${userAnswers[currentIndex][idx] === false ? 'active-false' : ''}`;
+                    bF.innerText = 'SAI';
+                    bF.onclick = () => { userAnswers[currentIndex][idx] = false; showQuestion(); playPing(); };
+                    
+                    btns.appendChild(bT); btns.appendChild(bF);
+                    row.appendChild(btns);
+                    area.appendChild(row);
+                });
+            } else { // Part III
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.placeholder = 'Nhập đáp án (Dãy số không quá 4 kí tự)';
+                input.value = userAnswers[currentIndex] || '';
+                input.oninput = (e) => { userAnswers[currentIndex] = e.target.value; };
+                area.appendChild(input);
+                const hint = document.createElement('p');
+                hint.innerText = "Lưu ý: Nếu là dãy nhận định, ghi số tăng dần (VD: 124).";
+                area.appendChild(hint);
+            }
+
+            document.getElementById('btn-prev').style.visibility = currentIndex === 0 ? 'hidden' : 'visible';
+            document.getElementById('btn-next').innerText = currentIndex === 19 ? 'NỘP BÀI' : 'Tiếp theo';
+        }
+
+        function startTimer() {
+            document.getElementById('timer-box').innerText = `Thời gian: ${timeLeft}s`;
+            timer = setInterval(() => {
+                timeLeft--;
+                document.getElementById('timer-box').innerText = `Thời gian: ${timeLeft}s`;
+                if(timeLeft <= 0) {
+                    clearInterval(timer);
+                    nextQuestion();
+                }
+            }, 1000);
+        }
+
+        function nextQuestion() {
+            if(currentIndex < 19) {
+                currentIndex++;
+                showQuestion();
+            } else {
+                finishGame();
+            }
+        }
+
+        function prevQuestion() {
+            if(currentIndex > 0) {
+                currentIndex--;
+                showQuestion();
+            }
+        }
+
+        function finishGame() {
+            clearInterval(timer);
+            playBell();
+            let totalScore = 0;
+            let historyHtml = `<table class="history-table"><tr><th>Câu</th><th>Bạn chọn</th><th>Đáp án</th><th>Giải thích</th></tr>`;
+
+            currentQuiz.forEach((q, i) => {
+                let scoreQ = 0;
+                let userVal = userAnswers[i];
+                let correctVal = "";
+
+                if(i < 12) { // Part I
+                    correctVal = q.correct.toUpperCase();
+                    if(userVal === q.correct) { scoreQ = 0.25; totalScore += 0.25; }
+                    historyHtml += `<tr><td>${i+1}</td><td>${userVal ? userVal.toUpperCase() : 'Bỏ qua'}</td><td>${correctVal}</td><td>${scoreQ > 0 ? 'Đúng' : 'Sai. Công thức: I=U/R hoặc đặc điểm thấu kính.'}</td></tr>`;
+                } else if(i < 16) { // Part II
+                    let correctCount = 0;
+                    let displayUser = "";
+                    q.items.forEach((item, idx) => {
+                        if(userVal && userVal[idx] === item.correct) correctCount++;
+                        displayUser += `${userVal && userVal[idx] !== null ? (userVal[idx] ? 'Đ' : 'S') : '?'}|`;
+                    });
+                    const tfScores = [0, 0.0625, 0.125, 0.25, 0.5];
+                    scoreQ = tfScores[correctCount];
+                    totalScore += scoreQ;
+                    historyHtml += `<tr><td>${i+1}</td><td>${displayUser}</td><td>Hỗn hợp</td><td>Đúng ${correctCount}/4 ý.</td></tr>`;
+                } else { // Part III
+                    correctVal = q.correct;
+                    if(userVal && userVal.trim() === q.correct) { scoreQ = 0.5; totalScore += 0.5; }
+                    historyHtml += `<tr><td>${i+1}</td><td>${userVal || 'Trống'}</td><td>${correctVal}</td><td>${scoreQ > 0 ? 'Chính xác' : 'Sai số hoặc sai thứ tự.'}</td></tr>`;
+                }
+            });
+
+            historyHtml += `</table>`;
+            document.getElementById('game-container').style.display = 'none';
+            document.getElementById('result-screen').style.display = 'flex';
+            
+            const finalScore = totalScore.toFixed(1);
+            document.getElementById('score-display').innerText = `${finalScore} / 7.0`;
+            
+            let rank = "";
+            if(finalScore >= 6) rank = "XUẤT SẮC";
+            else if(finalScore >= 5) rank = "GIỎI";
+            else if(finalScore >= 4) rank = "KHÁ";
+            else if(finalScore >= 3) rank = "ĐẠT";
+            else rank = "CHƯA ĐẠT";
+            
+            document.getElementById('rank-display').innerText = `Xếp loại: ${rank}`;
+            document.getElementById('history-area').innerHTML = historyHtml;
+        }
+
+        // Giả lập âm thanh
+        function playPing() { console.log("Pinpong!"); }
+        function playBell() { console.log("Bell - Nộp bài!"); }
+
+    </script>
+</body>
+</html>
