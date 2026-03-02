@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game KHTN: Định luật Ohm & Thấu kính</title>
+    <style>
+        :root {
+            --primary: #1e88e5;
+            --secondary: #1565c0;
+            --gold: #ffd700;
+            --bg: #ffffff;
+            --text: #333;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f2f5;
+            margin: 0;
+            color: var(--text);
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Login Screen */
+        #login-screen {
+            background: linear-gradient(135deg, #0d47a1, #1976d2);
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .notebook-icon { font-size: 80px; margin-bottom: 10px; }
+        
+        .title-3d {
+            font-size: 42px;
+            color: var(--gold);
+            text-transform: uppercase;
+            font-weight: bold;
+            text-shadow: 3px 3px 0px #b8860b, 5px 5px 10px rgba(0,0,0,0.4);
+            margin: 20px;
+        }
+
+        .login-box {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+            width: 85%;
+            max-width: 450px;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+
+        button {
+            background: var(--primary);
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        button:hover { background: var(--secondary); transform: translateY(-2px); }
+
+        /* Game UI */
+        #game-container {
+            display: none;
+            flex-direction: column;
+            height: 100%;
+            background: var(--bg);
+        }
+
+        #header-bar {
+            background: #f8f9fa;
+            padding: 15px 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 3px solid var(--primary);
+            font-weight: bold;
+        }
+
+        #timer {
+            background: #e53935;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            min-width: 80px;
+            text-align: center;
+        }
+
+        #content-area {
+            flex: 1;
+            padding: 40px;
+            overflow-y: auto;
+        }
+
+        .q-title { font-size: 24px; font-weight: bold; margin-bottom: 25px; color: #1565c0; }
+
+        .opt-card {
+            background: #f1f8e9;
+            border: 2px solid #c5e1a5;
+            padding: 15px 20px;
+            margin-bottom: 15px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 18px;
+            transition: 0.2s;
+        }
+
+        .opt-card:hover { background: #dcedc8; }
+        .opt-card.active { background: var(--primary); color: white; border-color: var(--secondary); }
+
+        /* Đúng/Sai */
+        .tf-table { width: 100%; margin-top: 20px; border-collapse: collapse; }
+        .tf-row { border-bottom: 1px solid #eee; padding: 15px 0; display: flex; align-items: center; }
+        .tf-text { flex: 1; font-size: 18px; }
+        .tf-group { display: flex; gap: 10px; }
+        .btn-tf { padding: 8px 15px; border-radius: 6px; border: 1px solid #ccc; cursor: pointer; font-weight: bold; }
+        .btn-tf.true.selected { background: #4caf50; color: white; }
+        .btn-tf.false.selected { background: #f44336; color: white; }
+
+        #nav-footer {
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            background: #f8f9fa;
+            border-top: 1px solid #ddd;
+        }
+
+        .copyright { text-align: center; font-size: 12px; color: #888; padding: 10px; }
+
+        /* Results */
+        #result-screen {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px;
+            overflow-y: auto;
+            text-align: center;
+        }
+
+        .score-circle {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            border: 8px solid var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            font-weight: bold;
+            color: var(--primary);
+            margin: 20px;
+        }
+
+        table.history { width: 100%; max-width: 800px; border-collapse: collapse; margin-top: 30px; }
+        .history th, .history td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+        .history th { background: #eee; }
+    </style>
+</head>
+<body>
+
+    <div id="login-screen">
+        <div class="notebook-icon">📖✏️</div>
+        <h1 class="title-3d">ĐỊNH LUẬT OHM & THẤU KÍNH</h1>
+        <div class="login-box">
+            <input type="text" id="stuName" placeholder="Họ và tên thí sinh">
+            <input type="text" id="stuID" placeholder="Số báo danh">
+            <input type="text" id="stuClass" placeholder="Lớp">
+            <input type="text" id="stuSchool" placeholder="Trường">
+            <button onclick="initGame()">BẮT ĐẦU THI</button>
+        </div>
+    </div>
+
+    <div id="game-container">
+        <div id="header-bar">
+            <div id="user-info"></div>
+            <div id="timer">00</div>
+        </div>
+        <div id="content-area">
+            <div id="q-box"></div>
+        </div>
+        <div id="nav-footer">
+            <button id="prevBtn" onclick="changeQ(-1)" style="background:#777">Quay lại</button>
+            <button id="nextBtn" onclick="changeQ(1)">Tiếp theo</button>
+        </div>
+        <div class="copyright">Bản quyền thuộc về Thạc sĩ Nguyễn Văn Cần, Thành phố Huế</div>
+    </div>
+
+    <div id="result-screen">
+        <h2 class="title-3d" style="color:var(--primary)">KẾT QUẢ BÀI THI</h2>
+        <div class="score-circle" id="finalScore">0</div>
+        <h3 id="rankLabel">XẾP LOẠI</h3>
+        <div id="details"></div>
+        <button onclick="location.reload()" style="margin-top:30px">LÀM LẠI</button>
+    </div>
+
+<script>
+    // NGÂN HÀNG CÂU HỎI (Mẫu tiêu biểu tuân thủ YCCĐ)
+    const BANK = {
+        P1: [
+            {q: "Hệ thức của định luật Ohm là", a: "I = U/R.", b: "I = U.R.", c: "R = U/I.", d: "U = I/R.", correct: "a"},
+            {q: "Đơn vị của điện trở là", a: "Volt (V).", b: "Ampere (A).", c: "Ohm (Ω).", d: "Watt (W).", correct: "c"},
+            {q: "Thấu kính hội tụ là loại thấu kính có", a: "phần rìa dày hơn phần giữa.", b: "phần rìa mỏng hơn phần giữa.", c: "độ dày bằng nhau mọi điểm.", d: "khả năng phản xạ ánh sáng.", correct: "b"},
+            {q: "Tia sáng đi qua quang tâm của thấu kính thì", a: "bị gãy khúc.", b: "truyền thẳng.", c: "phản xạ ngược lại.", d: "đi qua tiêu điểm.", correct: "b"},
+            {q: "Khi tăng hiệu điện thế giữa hai đầu dây dẫn lên 3 lần thì cường độ dòng điện sẽ", a: "giảm 3 lần.", b: "tăng 3 lần.", c: "không đổi.", d: "tăng 9 lần.", correct: "b"},
+            {q: "Ảnh của một vật tạo bởi thấu kính phân kì LUÔN là", a: "ảnh ảo, ngược chiều.", b: "ảnh ảo, cùng chiều, nhỏ hơn vật.", c: "ảnh thật, cùng chiều.", d: "ảnh thật, ngược chiều.", correct: "b"},
+            {q: "Công thức tính điện trở tương đương của đoạn mạch gồm hai điện trở mắc nối tiếp là", a: "R = R1 + R2.", b: "R = R1.R2.", c: "1/R = 1/R1 + 1/R2.", d: "R = |R1 - R2|.", correct: "a"},
+            {q: "Vật nằm tại tiêu điểm của thấu kính hội tụ sẽ cho ảnh ở đâu?", a: "Tại quang tâm.", b: "Ở vô cực.", c: "Tại tiêu điểm bên kia.", d: "Cách thấu kính một khoảng f.", correct: "b"},
+            {q: "Đồ thị biểu diễn sự phụ thuộc của I vào U là một đường", a: "cong parabol.", b: "thẳng đi qua gốc tọa độ.", c: "thẳng song song trục tung.", d: "gãy khúc.", correct: "b"},
+            {q: "Kí hiệu tiêu cự của thấu kính là", a: "D.", b: "f.", c: "O.", d: "F.", correct: "b"},
+            {q: "Để đo cường độ dòng điện qua vật dẫn, ta mắc ampe kế như thế nào?", a: "Song song với vật.", b: "Nối tiếp với vật.", c: "Bất kì.", d: "Vừa nối tiếp vừa song song.", correct: "b"},
+            {q: "Một điện trở 10 Ω được mắc vào hiệu điện thế 5 V. Cường độ dòng điện là", a: "2 A.", b: "0,5 A.", c: "50 A.", d: "15 A.", correct: "b"}
+        ],
+        P2: [
+            {
+                intro: "Một thấu kính hội tụ có tiêu cự f = 15 cm. Đặt vật AB vuông góc trục chính.",
+                items: [
+                    {t: "Nếu vật đặt cách thấu kính 10 cm thì ảnh thu được là ảnh thật.", c: false},
+                    {t: "Tia sáng song song trục chính sẽ ló ra đi qua tiêu điểm ảnh.", c: true},
+                    {t: "Nếu vật đặt cách thấu kính 30 cm thì ảnh cao bằng vật.", c: true},
+                    {t: "Thấu kính hội tụ có thể dùng làm kính lúp.", c: true}
+                ]
+            },
+            {
+                intro: "Cho đoạn mạch gồm R1 = 20 Ω mắc song song với R2 = 20 Ω.",
+                items: [
+                    {t: "Điện trở tương đương của mạch là 40 Ω.", c: false},
+                    {t: "Hiệu điện thế giữa hai đầu R1 và R2 luôn bằng nhau.", c: true},
+                    {t: "Cường độ dòng điện qua mỗi điện trở là như nhau.", c: true},
+                    {t: "Nếu tháo bỏ R1 thì R2 KHÔNG có dòng điện chạy qua.", c: false}
+                ]
+            }
+        ],
+        P3: [
+            {q: "Đặt điện trở R = 15 Ω vào hiệu điện thế U = 4,5 V. Cường độ dòng điện I là bao nhiêu Ampere?", correct: "0,3"},
+            {q: "Thấu kính hội tụ có f = 12 cm. Để có ảnh thật cao bằng vật, vật phải đặt cách thấu kính bao nhiêu cm?", correct: "24"},
+            {q: "Cho các nhận định:\n1. I tỉ lệ thuận với U.\n2. R phụ thuộc vào U.\n3. Đơn vị R là Ω.\n4. I tỉ lệ nghịch với R.\nChọn các ý ĐÚNG sắp xếp tăng dần.", correct: "134"},
+            {q: "Mạch song song có R1=10, R2=10. Tính điện trở tương đương (ohm)?", correct: "5"}
+        ]
+    };
+
+    let quiz = [], currentIdx = 0, answers = [], timerInterval, timeLeft = 90;
+
+    function initGame() {
+        const name = document.getElementById('stuName').value;
+        if(!name) return alert("Vui lòng nhập tên!");
+        
+        document.getElementById('user-info').innerText = `TS: ${name} | SBD: ${document.getElementById('stuID').value}`;
+        document.getElementById('login-screen').style.display = 'none';
+        document.getElementById('game-container').style.display = 'flex';
+        
+        // Trộn và lấy câu hỏi (Giả lập ngẫu nhiên từ bank)
+        quiz = [...BANK.P1, ...BANK.P2, ...BANK.P3]; 
+        answers = new Array(quiz.length).fill(null);
+        showQ();
+    }
+
+    function showQ() {
+        clearInterval(timerInterval);
+        const q = quiz[currentIdx];
+        const box = document.getElementById('q-box');
+        box.innerHTML = `<div class="q-title">Câu ${currentIdx + 1}: ${q.intro || q.q}</div>`;
+
+        if(currentIdx < 12) { // Part I
+            timeLeft = 90;
+            ['a','b','c','d'].forEach(o => {
+                const d = document.createElement('div');
+                d.className = `opt-card ${answers[currentIdx] === o ? 'active' : ''}`;
+                d.innerText = `${o.toUpperCase()}. ${q[o]}`;
+                d.onclick = () => { answers[currentIdx] = o; showQ(); };
+                box.appendChild(d);
+            });
+        } else if(currentIdx < 14) { // Part II
+            timeLeft = 120;
+            if(!answers[currentIdx]) answers[currentIdx] = [null, null, null, null];
+            q.items.forEach((item, i) => {
+                const row = document.createElement('div');
+                row.className = 'tf-row';
+                row.innerHTML = `<div class="tf-text">${String.fromCharCode(97+i)}) ${item.t}</div>`;
+                const group = document.createElement('div');
+                group.className = 'tf-group';
+                
+                const bT = document.createElement('button');
+                bT.className = `btn-tf true ${answers[currentIdx][i] === true ? 'selected' : ''}`;
+                bT.innerText = "ĐÚNG";
+                bT.onclick = () => { answers[currentIdx][i] = true; showQ(); };
+                
+                const bF = document.createElement('button');
+                bF.className = `btn-tf false ${answers[currentIdx][i] === false ? 'selected' : ''}`;
+                bF.innerText = "SAI";
+                bF.onclick = () => { answers[currentIdx][i] = false; showQ(); };
+                
+                group.append(bT, bF);
+                row.append(group);
+                box.appendChild(row);
+            });
+        } else { // Part III
+            timeLeft = 120;
+            const input = document.createElement('input');
+            input.type = "text";
+            input.value = answers[currentIdx] || "";
+            input.placeholder = "Nhập đáp án...";
+            input.onchange = (e) => answers[currentIdx] = e.target.value;
+            box.appendChild(input);
+        }
+
+        document.getElementById('nextBtn').innerText = currentIdx === quiz.length - 1 ? "NỘP BÀI" : "Tiếp theo";
+        startTimer();
+    }
+
+    function startTimer() {
+        timerInterval = setInterval(() => {
+            timeLeft--;
+            document.getElementById('timer').innerText = timeLeft;
+            if(timeLeft <= 0) { clearInterval(timerInterval); changeQ(1); }
+        }, 1000);
+    }
+
+    function changeQ(step) {
+        if(step === 1 && currentIdx === quiz.length - 1) return finalize();
+        currentIdx += step;
+        if(currentIdx < 0) currentIdx = 0;
+        showQ();
+    }
+
+    function finalize() {
+        let score = 0;
+        quiz.forEach((q, i) => {
+            if(i < 12) { // Part I: 0.5đ/câu
+                if(answers[i] === q.correct) score += 0.5;
+            } else if(i < 14) { // Part II: 0.5đ/câu (0.125 mỗi ý)
+                q.items.forEach((item, j) => {
+                    if(answers[i] && answers[i][j] === item.c) score += 0.125;
+                });
+            } else { // Part III: 0.5đ/câu
+                if(answers[i] && answers[i].trim() === q.correct) score += 0.5;
+            }
+        });
+
+        document.getElementById('game-container').style.display = 'none';
+        document.getElementById('result-screen').style.display = 'flex';
+        document.getElementById('finalScore').innerText = score.toFixed(1);
+        
+        let label = "CHƯA ĐẠT";
+        if(score >= 9) label = "XUẤT SẮC";
+        else if(score >= 8) label = "GIỎI";
+        else if(score >= 6.5) label = "KHÁ";
+        else if(score >= 5) label = "ĐẠT";
+        document.getElementById('rankLabel').innerText = "Xếp loại: " + label;
+    }
+</script>
+</body>
+</html>
