@@ -3,21 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Game KHTN: Định luật Ohm & Thấu kính</title>
+    <title>KHTN 9 CTST: Ôn tập Định luật Ohm & Thấu kính</title>
     <style>
         :root {
-            --primary: #1e88e5;
-            --secondary: #1565c0;
+            --primary-blue: #1e88e5;
             --gold: #ffd700;
-            --bg: #ffffff;
-            --text: #333;
+            --white: #ffffff;
+            --correct: #28a745;
+            --wrong: #dc3545;
         }
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f0f2f5;
+            background-color: #f4f7f6;
             margin: 0;
-            color: var(--text);
             display: flex;
             flex-direction: column;
             height: 100vh;
@@ -26,346 +25,272 @@
 
         /* Login Screen */
         #login-screen {
-            background: linear-gradient(135deg, #0d47a1, #1976d2);
+            background: linear-gradient(135deg, #0d47a1, #1e88e5);
             height: 100%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
         }
 
-        .notebook-icon { font-size: 80px; margin-bottom: 10px; }
-        
         .title-3d {
-            font-size: 42px;
-            color: var(--gold);
-            text-transform: uppercase;
-            font-weight: bold;
-            text-shadow: 3px 3px 0px #b8860b, 5px 5px 10px rgba(0,0,0,0.4);
-            margin: 20px;
+            font-size: 38px; color: var(--gold); text-transform: uppercase; font-weight: bold;
+            text-shadow: 2px 2px 0px #b8860b, 4px 4px 5px rgba(0,0,0,0.5);
+            margin-bottom: 20px; text-align: center;
         }
 
-        .login-box {
-            background: white;
-            padding: 30px;
-            border-radius: 20px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
-            width: 85%;
-            max-width: 450px;
+        .input-group {
+            background: rgba(255, 255, 255, 0.95); padding: 30px; border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3); width: 85%; max-width: 420px;
         }
 
-        input {
-            width: 100%;
-            padding: 12px;
-            margin: 10px 0;
-            border: 2px solid #ddd;
-            border-radius: 8px;
-            box-sizing: border-box;
-            font-size: 16px;
-        }
+        input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; }
 
         button {
-            background: var(--primary);
-            color: white;
-            padding: 15px 30px;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-            font-size: 18px;
-            font-weight: bold;
-            transition: all 0.3s;
+            background-color: var(--primary-blue); color: white; padding: 15px 30px;
+            border: none; border-radius: 8px; cursor: pointer; font-size: 18px; font-weight: bold; margin-top: 15px;
         }
 
-        button:hover { background: var(--secondary); transform: translateY(-2px); }
+        /* Game Interface */
+        #game-container { display: none; flex-direction: column; height: 100%; background: white; }
 
-        /* Game UI */
-        #game-container {
-            display: none;
-            flex-direction: column;
-            height: 100%;
-            background: var(--bg);
+        #header-status {
+            background: #f1f1f1; padding: 10px 20px; display: flex; justify-content: space-between;
+            border-bottom: 2px solid var(--primary-blue); font-size: 14px;
         }
 
-        #header-bar {
-            background: #f8f9fa;
-            padding: 15px 25px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 3px solid var(--primary);
-            font-weight: bold;
+        #timer { background: #d32f2f; color: white; padding: 4px 12px; border-radius: 15px; font-weight: bold; }
+
+        #content { flex: 1; padding: 30px; overflow-y: auto; }
+
+        .q-text { font-size: 20px; font-weight: bold; margin-bottom: 20px; }
+
+        .opt-btn {
+            background: #e3f2fd; border: 1px solid #bbdefb; padding: 15px; margin-bottom: 10px;
+            border-radius: 8px; cursor: pointer; font-size: 17px;
         }
 
-        #timer {
-            background: #e53935;
-            color: white;
-            padding: 8px 15px;
-            border-radius: 20px;
-            min-width: 80px;
-            text-align: center;
-        }
+        .opt-btn.active { background: var(--primary-blue); color: white; }
 
-        #content-area {
-            flex: 1;
-            padding: 40px;
-            overflow-y: auto;
-        }
+        .tf-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px dashed #ccc; }
 
-        .q-title { font-size: 24px; font-weight: bold; margin-bottom: 25px; color: #1565c0; }
+        /* Result & Review */
+        #result-screen { display: none; flex-direction: column; align-items: center; padding: 30px; overflow-y: auto; }
 
-        .opt-card {
-            background: #f1f8e9;
-            border: 2px solid #c5e1a5;
-            padding: 15px 20px;
-            margin-bottom: 15px;
-            border-radius: 12px;
-            cursor: pointer;
-            font-size: 18px;
-            transition: 0.2s;
-        }
+        .review-table { width: 100%; max-width: 900px; border-collapse: collapse; margin-top: 20px; background: white; }
+        .review-table th, .review-table td { border: 1px solid #ddd; padding: 12px; text-align: left; font-size: 14px; }
+        .review-table th { background-color: var(--primary-blue); color: white; }
+        .res-correct { color: var(--correct); font-weight: bold; }
+        .res-wrong { color: var(--wrong); font-weight: bold; }
 
-        .opt-card:hover { background: #dcedc8; }
-        .opt-card.active { background: var(--primary); color: white; border-color: var(--secondary); }
-
-        /* Đúng/Sai */
-        .tf-table { width: 100%; margin-top: 20px; border-collapse: collapse; }
-        .tf-row { border-bottom: 1px solid #eee; padding: 15px 0; display: flex; align-items: center; }
-        .tf-text { flex: 1; font-size: 18px; }
-        .tf-group { display: flex; gap: 10px; }
-        .btn-tf { padding: 8px 15px; border-radius: 6px; border: 1px solid #ccc; cursor: pointer; font-weight: bold; }
-        .btn-tf.true.selected { background: #4caf50; color: white; }
-        .btn-tf.false.selected { background: #f44336; color: white; }
-
-        #nav-footer {
-            padding: 20px 40px;
-            display: flex;
-            justify-content: space-between;
-            background: #f8f9fa;
-            border-top: 1px solid #ddd;
-        }
-
-        .copyright { text-align: center; font-size: 12px; color: #888; padding: 10px; }
-
-        /* Results */
-        #result-screen {
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            padding: 40px;
-            overflow-y: auto;
-            text-align: center;
-        }
-
-        .score-circle {
-            width: 150px;
-            height: 150px;
-            border-radius: 50%;
-            border: 8px solid var(--primary);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 48px;
-            font-weight: bold;
-            color: var(--primary);
-            margin: 20px;
-        }
-
-        table.history { width: 100%; max-width: 800px; border-collapse: collapse; margin-top: 30px; }
-        .history th, .history td { border: 1px solid #ddd; padding: 12px; text-align: left; }
-        .history th { background: #eee; }
+        #footer { padding: 10px; background: #f9f9f9; text-align: center; font-size: 11px; color: #777; }
     </style>
 </head>
 <body>
 
     <div id="login-screen">
-        <div class="notebook-icon">📖✏️</div>
-        <h1 class="title-3d">ĐỊNH LUẬT OHM & THẤU KÍNH</h1>
-        <div class="login-box">
-            <input type="text" id="stuName" placeholder="Họ và tên thí sinh">
-            <input type="text" id="stuID" placeholder="Số báo danh">
-            <input type="text" id="stuClass" placeholder="Lớp">
-            <input type="text" id="stuSchool" placeholder="Trường">
-            <button onclick="initGame()">BẮT ĐẦU THI</button>
+        <h1 class="title-3d">📖 KHTN 9 CTST: OHM & THẤU KÍNH ✏️</h1>
+        <div class="input-group">
+            <input type="text" id="name" placeholder="Họ và tên học sinh">
+            <input type="text" id="class" placeholder="Lớp">
+            <button onclick="initGame()">BẮT ĐẦU</button>
         </div>
     </div>
 
     <div id="game-container">
-        <div id="header-bar">
-            <div id="user-info"></div>
-            <div id="timer">00</div>
+        <div id="header-status">
+            <div id="info-display"></div>
+            <div id="timer">Thời gian: 90s</div>
         </div>
-        <div id="content-area">
-            <div id="q-box"></div>
+        <div id="content"><div id="q-area"></div></div>
+        <div id="footer">
+            <button id="prev" onclick="move(-1)" style="background:#888">Quay lại</button>
+            <button id="next" onclick="move(1)">Tiếp theo</button>
+            <p>Bản quyền thuộc về Thạc sĩ Nguyễn Văn Cần, Thành phố Huế</p>
         </div>
-        <div id="nav-footer">
-            <button id="prevBtn" onclick="changeQ(-1)" style="background:#777">Quay lại</button>
-            <button id="nextBtn" onclick="changeQ(1)">Tiếp theo</button>
-        </div>
-        <div class="copyright">Bản quyền thuộc về Thạc sĩ Nguyễn Văn Cần, Thành phố Huế</div>
     </div>
 
     <div id="result-screen">
-        <h2 class="title-3d" style="color:var(--primary)">KẾT QUẢ BÀI THI</h2>
-        <div class="score-circle" id="finalScore">0</div>
-        <h3 id="rankLabel">XẾP LOẠI</h3>
-        <div id="details"></div>
-        <button onclick="location.reload()" style="margin-top:30px">LÀM LẠI</button>
+        <h1 class="title-3d" style="color:#0d47a1">KẾT QUẢ BÀI LÀM</h1>
+        <div id="final-score" style="font-size:50px; font-weight:bold; color:var(--primary-blue)">0.0</div>
+        <h2 id="rank">XẾP LOẠI</h2>
+        
+        <h3>BẢNG XEM LẠI CHI TIẾT</h3>
+        <table class="review-table">
+            <thead>
+                <tr>
+                    <th>Câu</th>
+                    <th>Nội dung</th>
+                    <th>Đáp án của bạn</th>
+                    <th>Đáp án đúng</th>
+                    <th>Giải thích (CTST)</th>
+                </tr>
+            </thead>
+            <tbody id="review-body"></tbody>
+        </table>
+        
+        <button onclick="location.reload()" style="margin: 20px;">LÀM LẠI TRÒ CHƠI</button>
     </div>
 
 <script>
-    // NGÂN HÀNG CÂU HỎI (Mẫu tiêu biểu tuân thủ YCCĐ)
     const BANK = {
         P1: [
-            {q: "Hệ thức của định luật Ohm là", a: "I = U/R.", b: "I = U.R.", c: "R = U/I.", d: "U = I/R.", correct: "a"},
-            {q: "Đơn vị của điện trở là", a: "Volt (V).", b: "Ampere (A).", c: "Ohm (Ω).", d: "Watt (W).", correct: "c"},
-            {q: "Thấu kính hội tụ là loại thấu kính có", a: "phần rìa dày hơn phần giữa.", b: "phần rìa mỏng hơn phần giữa.", c: "độ dày bằng nhau mọi điểm.", d: "khả năng phản xạ ánh sáng.", correct: "b"},
-            {q: "Tia sáng đi qua quang tâm của thấu kính thì", a: "bị gãy khúc.", b: "truyền thẳng.", c: "phản xạ ngược lại.", d: "đi qua tiêu điểm.", correct: "b"},
-            {q: "Khi tăng hiệu điện thế giữa hai đầu dây dẫn lên 3 lần thì cường độ dòng điện sẽ", a: "giảm 3 lần.", b: "tăng 3 lần.", c: "không đổi.", d: "tăng 9 lần.", correct: "b"},
-            {q: "Ảnh của một vật tạo bởi thấu kính phân kì LUÔN là", a: "ảnh ảo, ngược chiều.", b: "ảnh ảo, cùng chiều, nhỏ hơn vật.", c: "ảnh thật, cùng chiều.", d: "ảnh thật, ngược chiều.", correct: "b"},
-            {q: "Công thức tính điện trở tương đương của đoạn mạch gồm hai điện trở mắc nối tiếp là", a: "R = R1 + R2.", b: "R = R1.R2.", c: "1/R = 1/R1 + 1/R2.", d: "R = |R1 - R2|.", correct: "a"},
-            {q: "Vật nằm tại tiêu điểm của thấu kính hội tụ sẽ cho ảnh ở đâu?", a: "Tại quang tâm.", b: "Ở vô cực.", c: "Tại tiêu điểm bên kia.", d: "Cách thấu kính một khoảng f.", correct: "b"},
-            {q: "Đồ thị biểu diễn sự phụ thuộc của I vào U là một đường", a: "cong parabol.", b: "thẳng đi qua gốc tọa độ.", c: "thẳng song song trục tung.", d: "gãy khúc.", correct: "b"},
-            {q: "Kí hiệu tiêu cự của thấu kính là", a: "D.", b: "f.", c: "O.", d: "F.", correct: "b"},
-            {q: "Để đo cường độ dòng điện qua vật dẫn, ta mắc ampe kế như thế nào?", a: "Song song với vật.", b: "Nối tiếp với vật.", c: "Bất kì.", d: "Vừa nối tiếp vừa song song.", correct: "b"},
-            {q: "Một điện trở 10 Ω được mắc vào hiệu điện thế 5 V. Cường độ dòng điện là", a: "2 A.", b: "0,5 A.", c: "50 A.", d: "15 A.", correct: "b"}
+            { q: "Đồ thị biểu diễn mối quan hệ giữa I và U của một điện trở là", a: "đường cong.", b: "đường thẳng đi qua gốc tọa độ.", c: "đường gấp khúc.", d: "đường tròn.", correct: "b", explain: "Theo bài 12 SGK CTST, đồ thị I-U là một đường thẳng đi qua gốc tọa độ (0,0)." },
+            { q: "Khi tăng hiệu điện thế lên 2 lần thì cường độ dòng điện chạy qua điện trở sẽ", a: "tăng 2 lần.", b: "giảm 2 lần.", c: "không đổi.", d: "tăng 4 lần.", correct: "a", explain: "Cường độ dòng điện tỉ lệ thuận với hiệu điện thế (Định luật Ohm)." },
+            { q: "Thấu kính hội tụ thường có phần rìa", a: "mỏng hơn phần giữa.", b: "dày hơn phần giữa.", c: "bằng phần giữa.", d: "trong suốt.", correct: "a", explain: "Đặc điểm nhận dạng thấu kính hội tụ (Bài 16 SGK CTST)." },
+            { q: "Ảnh tạo bởi thấu kính phân kì LUÔN là", a: "ảnh ảo, cùng chiều, nhỏ hơn vật.", b: "ảnh thật, ngược chiều.", c: "ảnh ảo, cùng chiều, lớn hơn vật.", d: "ảnh ảo, ngược chiều.", correct: "a", explain: "Thấu kính phân kì luôn cho ảnh ảo nằm trong khoảng tiêu cự và nhỏ hơn vật." },
+            { q: "Tia sáng song song với trục chính của thấu kính hội tụ sẽ cho tia ló", a: "đi qua tiêu điểm ảnh.", b: "truyền thẳng.", c: "song song trục chính.", d: "đi qua quang tâm.", correct: "a", explain: "Đây là một trong ba tia sáng đặc biệt qua thấu kính hội tụ." },
+            { q: "Điện trở của một vật dẫn đặc trưng cho", a: "khả năng cản trở dòng điện.", b: "khả năng dẫn điện tốt.", c: "hiệu điện thế đặt vào vật.", d: "công suất tiêu thụ.", correct: "a", explain: "Trị số R = U/I đặc trưng cho mức độ cản trở dòng điện." },
+            { q: "Đơn vị đo điện trở là", a: "Ohm (Ω).", b: "Ampere (A).", c: "Volt (V).", d: "Watt (W).", correct: "a", explain: "Đơn vị mang tên nhà bác học Georg Simon Ohm." },
+            { q: "Để đo cường độ dòng điện, ta mắc ampe kế", a: "nối tiếp vào mạch.", b: "song song với vật dẫn.", c: "bất kì.", d: "ngoài mạch điện.", correct: "a", explain: "Ampe kế có điện trở rất nhỏ nên phải mắc nối tiếp." },
+            { q: "Thấu kính hội tụ có tiêu cự 15 cm. Khoảng cách giữa hai tiêu điểm là", a: "30 cm.", b: "15 cm.", c: "0 cm.", d: "45 cm.", correct: "a", explain: "Khoảng cách FF' = 2f = 2 * 15 = 30 cm." },
+            { q: "Khoảng cách từ vật đến thấu kính kí hiệu là", a: "d.", b: "d'.", c: "f.", d: "O.", correct: "a", explain: "Quy ước kí hiệu trong bài tập thấu kính." },
+            { q: "Công thức đoạn mạch nối tiếp là", a: "Rtđ = R1 + R2.", b: "1/Rtđ = 1/R1 + 1/R2.", c: "Rtđ = R1 * R2.", d: "Rtđ = R1 / R2.", correct: "a", explain: "Trong đoạn mạch nối tiếp, điện trở tương đương bằng tổng các điện trở thành phần." },
+            { q: "Tia tới đi qua quang tâm O của thấu kính thì tia ló", a: "tiếp tục truyền thẳng.", b: "đi qua tiêu điểm.", c: "phản xạ ngược lại.", d: "bị lệch hướng.", correct: "a", explain: "Tia sáng qua quang tâm không bị khúc xạ." }
         ],
         P2: [
             {
-                intro: "Một thấu kính hội tụ có tiêu cự f = 15 cm. Đặt vật AB vuông góc trục chính.",
+                intro: "Xét mạch điện song song gồm R1 = 10 Ω và R2 = 15 Ω.",
                 items: [
-                    {t: "Nếu vật đặt cách thấu kính 10 cm thì ảnh thu được là ảnh thật.", c: false},
-                    {t: "Tia sáng song song trục chính sẽ ló ra đi qua tiêu điểm ảnh.", c: true},
-                    {t: "Nếu vật đặt cách thấu kính 30 cm thì ảnh cao bằng vật.", c: true},
-                    {t: "Thấu kính hội tụ có thể dùng làm kính lúp.", c: true}
+                    { t: "Hiệu điện thế hai đầu R1 luôn bằng hiệu điện thế hai đầu R2.", c: true, e: "Đặc điểm mạch song song: U = U1 = U2." },
+                    { t: "Cường độ dòng điện qua R1 nhỏ hơn cường độ qua R2.", c: false, e: "R1 < R2 nên I1 > I2 (I tỉ lệ nghịch với R)." },
+                    { t: "Điện trở tương đương của mạch là 6 Ω.", c: true, e: "Rtđ = (10*15)/(10+15) = 6 Ω." },
+                    { t: "Dòng điện mạch chính bằng tổng dòng điện các nhánh.", c: true, e: "Định luật nút mạch: I = I1 + I2." }
                 ]
             },
             {
-                intro: "Cho đoạn mạch gồm R1 = 20 Ω mắc song song với R2 = 20 Ω.",
+                intro: "Về thấu kính hội tụ và ảnh của vật sáng AB:",
                 items: [
-                    {t: "Điện trở tương đương của mạch là 40 Ω.", c: false},
-                    {t: "Hiệu điện thế giữa hai đầu R1 và R2 luôn bằng nhau.", c: true},
-                    {t: "Cường độ dòng điện qua mỗi điện trở là như nhau.", c: true},
-                    {t: "Nếu tháo bỏ R1 thì R2 KHÔNG có dòng điện chạy qua.", c: false}
+                    { t: "Vật đặt cách thấu kính d > 2f cho ảnh thật, nhỏ hơn vật.", c: true, e: "Tính chất ảnh qua thấu kính hội tụ (Bài 17 CTST)." },
+                    { t: "Vật đặt cách thấu kính d < f cho ảnh ảo, ngược chiều vật.", c: false, e: "Ảnh ảo phải cùng chiều với vật." },
+                    { t: "Ảnh thật luôn hứng được trên màn chắn.", c: true, e: "Định nghĩa ảnh thật." },
+                    { t: "Thấu kính hội tụ có thể làm kính lúp.", c: true, e: "Ứng dụng của thấu kính hội tụ khi vật nằm trong khoảng f." }
                 ]
             }
         ],
         P3: [
-            {q: "Đặt điện trở R = 15 Ω vào hiệu điện thế U = 4,5 V. Cường độ dòng điện I là bao nhiêu Ampere?", correct: "0,3"},
-            {q: "Thấu kính hội tụ có f = 12 cm. Để có ảnh thật cao bằng vật, vật phải đặt cách thấu kính bao nhiêu cm?", correct: "24"},
-            {q: "Cho các nhận định:\n1. I tỉ lệ thuận với U.\n2. R phụ thuộc vào U.\n3. Đơn vị R là Ω.\n4. I tỉ lệ nghịch với R.\nChọn các ý ĐÚNG sắp xếp tăng dần.", correct: "134"},
-            {q: "Mạch song song có R1=10, R2=10. Tính điện trở tương đương (ohm)?", correct: "5"}
+            { q: "Đặt U = 12 V vào điện trở R = 30 Ω. Cường độ I là bao nhiêu A?", correct: "0,4", explain: "I = U/R = 12/30 = 0,4 A." },
+            { q: "Tính điện trở tương đương của 2 điện trở 20 Ω mắc song song (ohm)?", correct: "10", explain: "Mắc song song giống nhau: Rtđ = R/2 = 10 Ω." },
+            { q: "Cho nhận định: 1. I tỉ lệ thuận U. 2. I tỉ lệ thuận R. 3. I tỉ lệ nghịch R. 4. U tỉ lệ nghịch R. Chọn các nhận định ĐÚNG sắp xếp tăng dần.", correct: "13", explain: "Định luật Ohm: I tỉ lệ thuận U và nghịch với R." },
+            { q: "Thấu kính hội tụ f = 10 cm, vật đặt tại d = 20 cm. Ảnh cách thấu kính bao nhiêu cm?", correct: "20", explain: "Vật đặt tại 2f thì ảnh thật cũng tại 2f (d=d'=20cm)." }
         ]
     };
 
-    let quiz = [], currentIdx = 0, answers = [], timerInterval, timeLeft = 90;
+    let quiz = [], userAnswers = [], currentIdx = 0, timer, timeLeft = 90;
 
     function initGame() {
-        const name = document.getElementById('stuName').value;
+        const name = document.getElementById('name').value;
         if(!name) return alert("Vui lòng nhập tên!");
-        
-        document.getElementById('user-info').innerText = `TS: ${name} | SBD: ${document.getElementById('stuID').value}`;
+        document.getElementById('info-display').innerText = `${name} | Lớp: ${document.getElementById('class').value}`;
         document.getElementById('login-screen').style.display = 'none';
         document.getElementById('game-container').style.display = 'flex';
-        
-        // Trộn và lấy câu hỏi (Giả lập ngẫu nhiên từ bank)
-        quiz = [...BANK.P1, ...BANK.P2, ...BANK.P3]; 
-        answers = new Array(quiz.length).fill(null);
+        quiz = [...BANK.P1, ...BANK.P2, ...BANK.P2, ...BANK.P3]; // Ghép đủ 20 câu
+        userAnswers = new Array(quiz.length).fill(null);
         showQ();
     }
 
     function showQ() {
-        clearInterval(timerInterval);
+        clearInterval(timer);
         const q = quiz[currentIdx];
-        const box = document.getElementById('q-box');
-        box.innerHTML = `<div class="q-title">Câu ${currentIdx + 1}: ${q.intro || q.q}</div>`;
+        const area = document.getElementById('q-area');
+        area.innerHTML = `<div class="q-text">Câu ${currentIdx + 1}. ${q.intro || q.q}</div>`;
 
-        if(currentIdx < 12) { // Part I
+        if(currentIdx < 12) { // P1
             timeLeft = 90;
             ['a','b','c','d'].forEach(o => {
-                const d = document.createElement('div');
-                d.className = `opt-card ${answers[currentIdx] === o ? 'active' : ''}`;
-                d.innerText = `${o.toUpperCase()}. ${q[o]}`;
-                d.onclick = () => { answers[currentIdx] = o; showQ(); };
-                box.appendChild(d);
+                const b = document.createElement('div');
+                b.className = `opt-btn ${userAnswers[currentIdx] === o ? 'active' : ''}`;
+                b.innerText = `${o.toUpperCase()}. ${q[o]}`;
+                b.onclick = () => { userAnswers[currentIdx] = o; showQ(); };
+                area.appendChild(b);
             });
-        } else if(currentIdx < 14) { // Part II
+        } else if(currentIdx < 16) { // P2
             timeLeft = 120;
-            if(!answers[currentIdx]) answers[currentIdx] = [null, null, null, null];
+            if(!userAnswers[currentIdx]) userAnswers[currentIdx] = [null, null, null, null];
             q.items.forEach((item, i) => {
                 const row = document.createElement('div');
                 row.className = 'tf-row';
-                row.innerHTML = `<div class="tf-text">${String.fromCharCode(97+i)}) ${item.t}</div>`;
-                const group = document.createElement('div');
-                group.className = 'tf-group';
-                
-                const bT = document.createElement('button');
-                bT.className = `btn-tf true ${answers[currentIdx][i] === true ? 'selected' : ''}`;
-                bT.innerText = "ĐÚNG";
-                bT.onclick = () => { answers[currentIdx][i] = true; showQ(); };
-                
-                const bF = document.createElement('button');
-                bF.className = `btn-tf false ${answers[currentIdx][i] === false ? 'selected' : ''}`;
-                bF.innerText = "SAI";
-                bF.onclick = () => { answers[currentIdx][i] = false; showQ(); };
-                
-                group.append(bT, bF);
-                row.append(group);
-                box.appendChild(row);
+                row.innerHTML = `<span>${String.fromCharCode(97+i)}) ${item.t}</span>
+                    <div>
+                        <button onclick="setTF(${i}, true)" class="${userAnswers[currentIdx][i] === true ? 'active' : ''}">ĐÚNG</button>
+                        <button onclick="setTF(${i}, false)" class="${userAnswers[currentIdx][i] === false ? 'active' : ''}">SAI</button>
+                    </div>`;
+                area.appendChild(row);
             });
-        } else { // Part III
+        } else { // P3
             timeLeft = 120;
             const input = document.createElement('input');
-            input.type = "text";
-            input.value = answers[currentIdx] || "";
-            input.placeholder = "Nhập đáp án...";
-            input.onchange = (e) => answers[currentIdx] = e.target.value;
-            box.appendChild(input);
+            input.value = userAnswers[currentIdx] || '';
+            input.onchange = (e) => userAnswers[currentIdx] = e.target.value;
+            area.appendChild(input);
         }
-
-        document.getElementById('nextBtn').innerText = currentIdx === quiz.length - 1 ? "NỘP BÀI" : "Tiếp theo";
         startTimer();
+        document.getElementById('prev').style.visibility = currentIdx === 0 ? 'hidden' : 'visible';
+        document.getElementById('next').innerText = currentIdx === 19 ? 'NỘP BÀI' : 'Tiếp theo';
     }
 
+    function setTF(idx, val) { userAnswers[currentIdx][idx] = val; showQ(); }
+
     function startTimer() {
-        timerInterval = setInterval(() => {
+        document.getElementById('timer').innerText = `Thời gian: ${timeLeft}s`;
+        timer = setInterval(() => {
             timeLeft--;
-            document.getElementById('timer').innerText = timeLeft;
-            if(timeLeft <= 0) { clearInterval(timerInterval); changeQ(1); }
+            document.getElementById('timer').innerText = `Thời gian: ${timeLeft}s`;
+            if(timeLeft <= 0) move(1);
         }, 1000);
     }
 
-    function changeQ(step) {
-        if(step === 1 && currentIdx === quiz.length - 1) return finalize();
-        currentIdx += step;
-        if(currentIdx < 0) currentIdx = 0;
-        showQ();
+    function move(step) {
+        if(step === 1 && currentIdx === 19) return finish();
+        currentIdx += step; showQ();
     }
 
-    function finalize() {
+    function finish() {
+        clearInterval(timer);
         let score = 0;
+        let reviewHtml = "";
+
         quiz.forEach((q, i) => {
-            if(i < 12) { // Part I: 0.5đ/câu
-                if(answers[i] === q.correct) score += 0.5;
-            } else if(i < 14) { // Part II: 0.5đ/câu (0.125 mỗi ý)
-                q.items.forEach((item, j) => {
-                    if(answers[i] && answers[i][j] === item.c) score += 0.125;
-                });
-            } else { // Part III: 0.5đ/câu
-                if(answers[i] && answers[i].trim() === q.correct) score += 0.5;
+            let uAns = userAnswers[i];
+            let isCorrect = false;
+            let correctText = "";
+            let userText = "";
+
+            if(i < 12) {
+                isCorrect = (uAns === q.correct);
+                if(isCorrect) score += 0.25;
+                correctText = q.correct.toUpperCase();
+                userText = uAns ? uAns.toUpperCase() : "Bỏ trống";
+            } else if(i < 16) {
+                let count = 0;
+                uAns = uAns || [null,null,null,null];
+                q.items.forEach((item, j) => { if(uAns[j] === item.c) count++; });
+                const pts = [0, 0.0625, 0.125, 0.25, 0.5];
+                score += pts[count];
+                isCorrect = (count === 4);
+                correctText = "Xem giải thích";
+                userText = `Đúng ${count}/4 ý`;
+            } else {
+                isCorrect = (uAns && uAns.trim() === q.correct);
+                if(isCorrect) score += 0.5;
+                correctText = q.correct;
+                userText = uAns || "Bỏ trống";
             }
+
+            reviewHtml += `<tr>
+                <td>${i+1}</td>
+                <td>${(q.q || q.intro).substring(0, 30)}...</td>
+                <td class="${isCorrect ? 'res-correct' : 'res-wrong'}">${userText}</td>
+                <td>${correctText}</td>
+                <td>${q.explain || "Dựa trên quy tắc mạch điện và thấu kính."}</td>
+            </tr>`;
         });
 
         document.getElementById('game-container').style.display = 'none';
         document.getElementById('result-screen').style.display = 'flex';
-        document.getElementById('finalScore').innerText = score.toFixed(1);
+        document.getElementById('final-score').innerText = score.toFixed(3);
+        document.getElementById('review-body').innerHTML = reviewHtml;
         
-        let label = "CHƯA ĐẠT";
-        if(score >= 9) label = "XUẤT SẮC";
-        else if(score >= 8) label = "GIỎI";
-        else if(score >= 6.5) label = "KHÁ";
-        else if(score >= 5) label = "ĐẠT";
-        document.getElementById('rankLabel').innerText = "Xếp loại: " + label;
+        let rank = "CHƯA ĐẠT";
+        if(score >= 6) rank = "XUẤT SẮC"; else if(score >= 5) rank = "GIỎI"; else if(score >= 4) rank = "KHÁ"; else if(score >= 3) rank = "ĐẠT";
+        document.getElementById('rank').innerText = "Xếp loại: " + rank;
     }
 </script>
 </body>
