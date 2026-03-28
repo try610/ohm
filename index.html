@@ -3,355 +3,633 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KHTN 9 CTST: Định luật Ohm & Thấu kính</title>
+    <title>Vật lý 9 - Điện trở & Định luật Ohm</title>
+    <!-- Hỗ trợ công thức Toán/Lý -->
+    <script>
+        window.MathJax = {
+            tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']] },
+            svg: { fontCache: 'global' }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <!-- Thư viện hiệu ứng và tiện ích -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    
     <style>
         :root {
-            --primary-blue: #1e88e5;
-            --gold: #ffd700;
-            --white: #ffffff;
+            --primary: #1e40af; --secondary: #3b82f6; --success: #10b981; --danger: #ef4444; 
+            --bg: #0f172a; --card: #ffffff; --text: #1e293b; --accent: #f59e0b;
+        }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); margin: 0; user-select: none; overflow-x: hidden; -webkit-tap-highlight-color: transparent; }
+        .container { max-width: 900px; margin: 0 auto; min-height: 100vh; display: flex; flex-direction: column; position: relative; z-index: 1; }
+        
+        .fire-text {
+            display: inline-block; color: #fff;
+            text-shadow: 0 0 10px #ff8d00, 0 0 20px #ff4e00, 0 0 30px #d43300;
+            animation: burn 1.5s infinite alternate;
+        }
+        @keyframes burn {
+            0% { transform: skew(0.5deg); text-shadow: 0 0 10px #ff8d00, 0 0 20px #ff4e00; }
+            100% { transform: skew(-0.5deg); text-shadow: 0 0 15px #ff8d00, 0 0 35px #ff4e00, 0 0 50px #ff0000; }
         }
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f4f7f6;
-            margin: 0;
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
+        header { 
+            background: rgba(30, 64, 175, 0.95); 
+            backdrop-filter: blur(5px); 
+            color: white; 
+            padding: 15px 20px; 
+            display: none; 
+            justify-content: space-between; 
+            align-items: center; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5); 
+            position: sticky; 
+            top: 0; 
+            z-index: 100; 
+        }
+        .timer { background: #fee2e2; color: #dc2626; padding: 8px 20px; border-radius: 20px; font-weight: bold; border: 2px solid #ef4444; font-size: 1.1rem; }
+
+        /* OVERLAY LỬA RỰC CHÁY (5 GIÂY) */
+        #wish-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #000; z-index: 10000;
+            display: none; flex-direction: column; justify-content: center; 
+            align-items: center; pointer-events: none; text-align: center;
             overflow: hidden;
         }
-
-        /* Màn hình đăng nhập */
-        #login-screen {
-            background: linear-gradient(135deg, #0d47a1, #1e88e5);
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
+        #fire-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+        
+        .wish-content { z-index: 10001; position: relative; width: 90%; max-width: 800px; }
+        
+        /* CHỮ CỐ LÊN SIÊU SẮC NÉT - LOẠI BỎ BLUR */
+        .wish-title {
+            font-size: 5rem; font-weight: 900; color: #fff;
+            text-transform: uppercase; margin: 0;
+            animation: wishSharp 5s ease-out forwards;
+            text-shadow: 0 0 20px #ff4e00, 0 0 50px #ffae00;
         }
-
-        .notebook-box {
-            position: relative;
-            font-size: 80px;
-            margin-bottom: 20px;
-        }
-
-        .title-3d {
-            font-size: 42px;
-            color: var(--gold);
-            text-transform: uppercase;
-            font-weight: bold;
-            text-shadow: 2px 2px 0px #b8860b, 4px 4px 5px rgba(0,0,0,0.5);
-            margin-bottom: 20px;
-        }
-
-        .input-group {
-            background: rgba(255, 255, 255, 0.95);
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-            width: 85%;
-            max-width: 420px;
-        }
-
-        input {
-            width: 100%;
-            padding: 12px;
-            margin: 8px 0;
-            border: 1px solid #ccc;
-            border-radius: 6px;
-            box-sizing: border-box;
-            font-size: 16px;
-        }
-
-        button {
-            background-color: var(--primary-blue);
-            color: white;
+        .wish-sub { font-size: 1.8rem; color: #fff; margin-top: 20px; opacity: 0; animation: fadeInSub 1s forwards 0.5s; font-weight: 600; }
+        
+        .cheat-warning-box {
+            background: #ef4444; 
+            color: #fff;
             padding: 15px 30px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 18px;
-            font-weight: bold;
-            transition: 0.3s;
-            margin-top: 15px;
-        }
-
-        /* Giao diện chính */
-        #game-container {
-            display: none;
-            flex-direction: column;
-            height: 100%;
-            background: white;
-        }
-
-        #header-status {
-            background: #f1f1f1;
-            padding: 10px 20px;
-            display: flex;
-            justify-content: space-between;
-            border-bottom: 2px solid var(--primary-blue);
-            font-size: 14px;
-        }
-
-        #timer {
-            background: #d32f2f;
-            color: white;
-            padding: 4px 12px;
             border-radius: 15px;
-            font-weight: bold;
-        }
-
-        #content {
-            flex: 1;
-            padding: 30px;
-            overflow-y: auto;
-        }
-
-        .q-text {
-            font-size: 20px;
-            font-weight: bold;
-            margin-bottom: 20px;
-            line-height: 1.5;
-        }
-
-        .opt-btn {
-            background: #e3f2fd;
-            border: 1px solid #bbdefb;
-            padding: 15px;
-            margin-bottom: 10px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 17px;
-            transition: 0.2s;
-        }
-
-        .opt-btn:hover { background: #bbdefb; }
-        .opt-btn.active { background: var(--primary-blue); color: white; }
-
-        /* Đúng/Sai */
-        .tf-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 0;
-            border-bottom: 1px dashed #ccc;
-        }
-        .tf-btns button {
-            padding: 5px 12px;
-            margin-left: 5px;
-            border: 1px solid #ccc;
-            cursor: pointer;
-            font-size: 13px;
-        }
-        .btn-true.active { background: #4caf50; color: white; }
-        .btn-false.active { background: #f44336; color: white; }
-
-        #footer {
-            padding: 15px;
-            display: flex;
-            justify-content: space-between;
-            background: #f9f9f9;
-        }
-
-        .copyright { font-size: 11px; text-align: center; color: #777; padding: 5px; }
-
-        /* Kết quả */
-        #result-screen {
+            font-size: 1.3rem;
+            font-weight: 900;
+            border: 4px solid #facc15;
+            box-shadow: 0 0 30px rgba(239, 68, 68, 0.8);
+            margin: 40px auto 0 auto;
             display: none;
-            flex-direction: column;
-            align-items: center;
-            padding: 40px;
-            overflow-y: auto;
+            z-index: 10002;
+            text-transform: uppercase;
+            animation: pulseWarning 1.2s infinite;
+            max-width: 600px;
+            line-height: 1.4;
         }
+
+        @keyframes wishSharp {
+            0% { transform: scale(0.6); opacity: 0; }
+            15% { transform: scale(1); opacity: 1; }
+            90% { transform: scale(1); opacity: 1; }
+            100% { transform: scale(1.2); opacity: 0; }
+        }
+        @keyframes fadeInSub {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes pulseWarning {
+            0% { transform: scale(1); background: #ef4444; }
+            50% { transform: scale(1.03); background: #dc2626; }
+            100% { transform: scale(1); background: #ef4444; }
+        }
+
+        .screen { display: none; padding: 20px; animation: fadeIn 0.4s ease; }
+        .screen.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .school-brand { 
+            text-align: center; padding: 60px 20px; 
+            background: linear-gradient(180deg, rgba(30, 64, 175, 1) 0%, rgba(15, 23, 42, 1) 100%);
+            color: white; border-radius: 0 0 50px 50px; margin-bottom: 30px;
+            border-bottom: 4px solid #ff4e00;
+        }
+        
+        .card { background: var(--card); padding: 30px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); margin-bottom: 25px; border: 1px solid #e2e8f0; }
+        .section-title { background: #f1f5f9; padding: 12px 18px; border-left: 6px solid #ff4e00; font-weight: bold; margin-bottom: 20px; color: var(--primary); font-size: 1.1rem; text-transform: uppercase; }
+
+        .option { border: 2px solid #e2e8f0; border-radius: 12px; padding: 14px 20px; margin-bottom: 12px; cursor: pointer; transition: 0.3s; background: #fff; font-size: 1rem; }
+        .option.selected { border-color: #ff4e00; background: #fff7ed; font-weight: bold; }
+        .option.correct { background: #d1fae5; border-color: var(--success); color: #065f46; font-weight: bold; }
+        .option.wrong { background: #fee2e2; border-color: var(--danger); color: #991b1b; }
+        
+        .tf-row { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px solid #f1f5f9; gap: 10px; }
+        .tf-btn { border: 2px solid #cbd5e0; background: white; padding: 8px 18px; border-radius: 10px; cursor: pointer; font-weight: bold; min-width: 65px; transition: 0.2s; }
+        .tf-btn.active-t { background: var(--success); color: white; border-color: var(--success); }
+        .tf-btn.active-f { background: var(--danger); color: white; border-color: var(--danger); }
+
+        .btn { padding: 12px 24px; border-radius: 12px; border: none; font-weight: 800; cursor: pointer; transition: 0.3s; text-transform: uppercase; }
+        .btn-fire { background: linear-gradient(45deg, #ff4e00, #ff8d00); color: white; box-shadow: 0 4px 15px rgba(255, 78, 0, 0.4); }
+        .btn-gray { background: #cbd5e0; color: #475569; }
+        .btn-admin-float { position: fixed; bottom: 20px; right: 20px; z-index: 1000; background: #475569; color: white; border-radius: 50px; padding: 10px 20px; font-size: 0.8rem; box-shadow: 0 4px 10px rgba(0,0,0,0.3); opacity: 0.7; cursor: pointer; border: none; }
+
+        input[type="text"], input[type="password"] { padding: 15px; border: 2px solid #e2e8f0; border-radius: 12px; width: 100%; box-sizing: border-box; outline: none; transition: 0.3s; font-size: 1rem; }
+        input[type="text"]:focus { border-color: #ff4e00; }
+
+        .rank-badge { font-size: 1.5rem; font-weight: 900; margin-top: 15px; padding: 10px 25px; border-radius: 50px; display: inline-block; animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); color: white; }
+        
+        .admin-table-container { overflow-x: auto; background: white; border-radius: 10px; border: 1px solid #e2e8f0; }
+        .admin-table { width: 100%; border-collapse: collapse; min-width: 800px; }
+        .admin-table th { background: var(--primary); color: white; padding: 12px; text-align: left; font-size: 0.85rem; }
+        .admin-table td { padding: 12px; border-bottom: 1px solid #f1f5f9; font-size: 0.9rem; }
+        .stat-box { flex: 1; min-width: 130px; background: white; padding: 15px; border-radius: 15px; text-align: center; border-bottom: 4px solid #cbd5e0; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 20000; display: none; justify-content: center; align-items: center; padding: 20px; }
+        .modal-box { background: white; padding: 30px; border-radius: 25px; width: 100%; max-width: 450px; text-align: center; }
+        
+        #cheat-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.98); z-index: 30000; display: none; justify-content: center; align-items: center; text-align: center; }
+        footer { padding: 40px 20px; text-align: center; color: #94a3b8; background: #0f172a; font-size: 0.85rem; border-top: 2px solid #1e293b; }
+
+        .review-choice-box { margin-top: 10px; padding: 10px; border-radius: 8px; font-size: 0.9rem; }
+        .review-correct { background: #d1fae5; color: #065f46; border: 1px solid #10b981; }
+        .review-wrong { background: #fee2e2; color: #991b1b; border: 1px solid #ef4444; }
     </style>
 </head>
-<body>
+<body oncontextmenu="return false;">
 
-    <div id="login-screen">
-        <div class="notebook-box">📖<span style="position:absolute; top:10px; right:-10px; font-size:40px">✏️</span></div>
-        <h1 class="title-3d">KHTN 9: Ohm & Thấu kính</h1>
-        <div class="input-group">
-            <input type="text" id="name" placeholder="Họ và tên học sinh">
-            <input type="text" id="sbd" placeholder="Số báo danh">
-            <input type="text" id="class" placeholder="Lớp">
-            <input type="text" id="school" placeholder="Trường">
-            <button onclick="initGame()">BẮT ĐẦU LÀM BÀI</button>
+<div id="wish-overlay">
+    <canvas id="fire-canvas"></canvas>
+    <div class="wish-content">
+        <h1 class="wish-title">🔥 CỐ LÊN! 🔥</h1>
+        <p class="wish-sub">Chúc bạn hoàn thành tốt bài làm!</p>
+        <div id="wish-cheat-info" class="cheat-warning-box">
+            HỆ THỐNG SẼ TỰ ĐỘNG NỘP BÀI<br>NẾU THOÁT TOÀN MÀN HÌNH HOẶC CHUYỂN TAB
         </div>
     </div>
+</div>
 
-    <div id="game-container">
-        <div id="header-status">
-            <div id="info-display"></div>
-            <div id="timer">Thời gian: 90s</div>
+<button id="btn-admin-open" class="btn-admin-float">QUẢN TRỊ 🔐</button>
+
+<!-- Hộp thoại xác nhận nộp bài -->
+<div id="confirm-finish-modal" class="modal-overlay">
+    <div class="modal-box">
+        <h2 style="color: var(--primary)">Xác nhận nộp bài?</h2>
+        <p>Bạn có chắc chắn muốn kết thúc bài làm và xem kết quả ngay không?</p>
+        <div style="display:flex; gap:10px; margin-top:20px;">
+            <button id="btn-modal-cancel" class="btn btn-gray" style="flex:1">LÀM TIẾP</button>
+            <button id="btn-modal-confirm" class="btn btn-fire" style="flex:1">NỘP BÀI</button>
         </div>
-        <div id="content">
-            <div id="q-area"></div>
-        </div>
-        <div id="footer">
-            <button id="prev" onclick="move(-1)" style="background:#888">Quay lại</button>
-            <button id="next" onclick="move(1)">Tiếp theo</button>
-        </div>
-        <div class="copyright">Bản quyền thuộc về Thạc sĩ Nguyễn Văn Cần, Thành phố Huế</div>
     </div>
+</div>
 
-    <div id="result-screen">
-        <h1 class="title-3d" style="color:#0d47a1">KẾT QUẢ CHI TIẾT</h1>
-        <div id="final-score" style="font-size:60px; font-weight:bold; color:var(--primary-blue)">0.0</div>
-        <h2 id="rank">XẾP LOẠI</h2>
-        <div id="history" style="width:100%; max-width:700px; text-align:left"></div>
-        <button onclick="location.reload()">THI LẠI</button>
-        <div class="copyright">Bản quyền thuộc về Thạc sĩ Nguyễn Văn Cần, Thành phố Huế</div>
+<div id="cheat-modal">
+    <div style="background: white; padding: 50px; border-radius: 30px; max-width: 500px; border: 10px solid var(--danger);">
+        <h1 style="color:var(--danger); font-size: 3rem; margin:0">CẢNH BÁO!</h1>
+        <p style="font-size: 1.3rem; margin: 25px 0; color: #1e293b;">Bạn đã rời khỏi cửa sổ làm bài. Hệ thống tự động nộp bài vì lý do bảo mật.</p>
+        <button id="btn-cheat-submit" class="btn btn-fire" style="width:100%;">XEM KẾT QUẢ</button>
     </div>
+</div>
 
-<script>
-    // NGÂN HÀNG CÂU HỎI (40 CÂU) - Nội dung CTST
-    const BANK = {
-        P1: [
-            { q: "Đồ thị biểu diễn mối quan hệ giữa cường độ dòng điện (I) và hiệu điện thế (U) đặt vào hai đầu một dây dẫn là", a: "một đường cong đi qua gốc tọa độ.", b: "một đường thẳng đi qua gốc tọa độ.", c: "một đường thẳng song song với trục hoành.", d: "một đường thẳng song song với trục tung.", correct: "b" },
-            { q: "Đơn vị nào sau đây KHÔNG phải là đơn vị của điện trở?", a: "Ohm (Ω).", b: "Kiloohm (kΩ).", c: "Megaoohm (MΩ).", d: "Ampere (A).", correct: "d" },
-            { q: "Thấu kính hội tụ có đặc điểm quang học là", a: "biến đổi chùm tia tới song song thành chùm tia ló hội tụ.", b: "biến đổi chùm tia tới song song thành chùm tia ló phân kì.", c: "luôn cho ảnh ảo lớn hơn vật.", d: "phản xạ toàn bộ ánh sáng chiếu tới.", correct: "a" },
-            { q: "Tia sáng truyền qua quang tâm O của thấu kính thì tia ló sẽ", a: "truyền thẳng theo phương của tia tới.", b: "đi qua tiêu điểm ảnh.", c: "song song với trục chính.", d: "phản xạ ngược lại.", correct: "a" },
-            { q: "Khi đặt vật tại tiêu điểm của thấu kính hội tụ thì ảnh sẽ ở", a: "vô cực.", b: "quang tâm.", c: "tiêu điểm đối diện.", d: "ngay tại vật.", correct: "a" },
-            { q: "Ảnh của một vật qua thấu kính phân kì LUÔN là", a: "ảnh ảo, cùng chiều và nhỏ hơn vật.", b: "ảnh ảo, cùng chiều và lớn hơn vật.", c: "ảnh thật, ngược chiều và nhỏ hơn vật.", d: "ảnh thật, ngược chiều và lớn hơn vật.", correct: "a" },
-            { q: "Công thức tính điện trở của một đoạn mạch theo định luật Ohm là", a: "R = U/I.", b: "R = I/U.", c: "R = U.I.", d: "R = U + I.", correct: "a" },
-            { q: "Hiện tượng khúc xạ ánh sáng xảy ra khi ánh sáng truyền", a: "trong một môi trường trong suốt đồng tính.", b: "xuyên góc qua mặt phân cách giữa hai môi trường trong suốt.", c: "đến mặt gương phẳng.", d: "trong môi trường chân không.", correct: "b" },
-            { q: "Mắc một điện trở 10 Ω vào hiệu điện thế 5 V. Cường độ dòng điện chạy qua điện trở là", a: "0,5 A.", b: "2 A.", c: "50 A.", d: "15 A.", correct: "a" },
-            { q: "Điện trở tương đương của đoạn mạch gồm R1 và R2 mắc nối tiếp là", a: "Rtđ = R1 + R2.", b: "Rtđ = R1 - R2.", c: "1/Rtđ = 1/R1 + 1/R2.", d: "Rtđ = R1 * R2.", correct: "a" },
-            { q: "Tiêu cự (f) của thấu kính là khoảng cách từ tiêu điểm đến", a: "quang tâm.", b: "vật sáng.", c: "ảnh.", d: "trục chính.", correct: "a" },
-            { q: "Kí hiệu của đơn vị điện trở là", a: "Ω.", b: "V.", c: "A.", d: "W.", correct: "a" }
-            // ... có thể bổ sung thêm cho đủ bank
-        ],
-        P2: [
-            {
-                intro: "Xét mạch điện gồm R1 = 15 Ω và R2 = 30 Ω mắc song song vào nguồn điện có hiệu điện thế U.",
-                items: [
-                    { text: "Điện trở tương đương của đoạn mạch bằng 45 Ω.", correct: false },
-                    { text: "Hiệu điện thế giữa hai đầu R1 bằng hiệu điện thế giữa hai đầu R2.", correct: true },
-                    { text: "Cường độ dòng điện qua R1 lớn hơn cường độ dòng điện qua R2.", correct: true },
-                    { text: "Nếu R1 bị hỏng, dòng điện qua R2 sẽ KHÔNG thay đổi (giả sử nguồn lý tưởng).", correct: true }
-                ]
-            },
-            {
-                intro: "Một thấu kính hội tụ có tiêu cự f = 12 cm. Đặt vật sáng AB vuông góc trục chính.",
-                items: [
-                    { text: "Vật đặt cách thấu kính d = 6 cm sẽ cho ảnh ảo.", correct: true },
-                    { text: "Vật đặt cách thấu kính d = 24 cm sẽ cho ảnh thật cao bằng vật.", correct: true },
-                    { text: "Tia ló của tia tới song song trục chính sẽ đi qua tiêu điểm ảnh.", correct: true },
-                    { text: "Thấu kính hội tụ có phần rìa dày hơn phần giữa.", correct: false }
-                ]
-            }
-        ],
-        P3: [
-            { q: "Mắc R1 = 60 Ω song song R2 = 60 Ω. Điện trở tương đương là bao nhiêu ohm?", correct: "30" },
-            { q: "Đặt vào hai đầu điện trở R hiệu điện thế 12 V thì I = 0,4 A. Tính R (ohm)?", correct: "30" },
-            { q: "Cho các nhận định:\n1. I tỉ lệ thuận với U.\n2. R tỉ lệ nghịch với I.\n3. R đo bằng Ampe.\n4. Đơn vị U là Volt.\nChọn các nhận định đúng rồi ghi đáp án bằng một dãy số tăng dần từ nhỏ đến lớn.", correct: "14" },
-            { q: "Thấu kính hội tụ f = 20 cm. Vật đặt tại d = 40 cm. Ảnh cách thấu kính bao nhiêu cm?", correct: "40" }
-        ]
-    };
+<div class="container">
+    <header id="main-header">
+        <div style="font-weight: 900; letter-spacing: 1px; color: #facc15;">HỆ THỐNG TRỰC TUYẾN</div>
+        <div class="timer" id="timer">--:--</div>
+    </header>
 
-    let quiz = [], userAnswers = [], currentIdx = 0, timer, timeLeft = 90;
+    <section id="screen-start" class="screen active">
+        <div class="school-brand">
+            <h1 class="fire-text" style="font-size: 2.2rem;">ÔN TẬP VẬT LÝ 9</h1>
+            <p style="color:white; opacity:0.8; margin-top:5px;">Chuyên đề: Điện trở - Định luật Ohm</p>
+        </div>
 
-    function initGame() {
-        const name = document.getElementById('name').value;
-        if(!name) return alert("Vui lòng nhập tên!");
-        document.getElementById('info-display').innerText = `${name} | Lớp: ${document.getElementById('class').value}`;
-        document.getElementById('login-screen').style.display = 'none';
-        document.getElementById('game-container').style.display = 'flex';
-        
-        // Trộn ngẫu nhiên câu hỏi (giả lập 20 câu theo cấu trúc)
-        quiz = [...BANK.P1, ...BANK.P2, ...BANK.P2, ...BANK.P3]; 
-        userAnswers = new Array(quiz.length).fill(null);
-        showQ();
-    }
+        <div class="card" style="max-width: 550px; margin: -40px auto 30px auto; position: relative; z-index: 2; display: block;">
+            <h3 style="text-align:center; margin-bottom: 20px; color: var(--primary);">NHẬP THÔNG TIN THÍ SINH</h3>
+            <p id="start-error" style="color: var(--danger); text-align: center; font-weight: bold; margin-bottom: 15px; display: none;">⚠️ Vui lòng điền đủ Họ tên, Lớp và SBD!</p>
+            <div style="margin-bottom: 15px;"><label style="font-size: 0.8rem; font-weight: bold; color: #64748b;">Họ và tên:</label><input type="text" id="username" placeholder="Nhập đầy đủ họ tên"></div>
+            <div style="margin-bottom: 15px;"><label style="font-size: 0.8rem; font-weight: bold; color: #64748b;">Lớp:</label><input type="text" id="user_class" placeholder="Ví dụ: 9A1"></div>
+            <div style="margin-bottom: 25px;"><label style="font-size: 0.8rem; font-weight: bold; color: #64748b;">Số báo danh:</label><input type="text" id="user_sbd" placeholder="Ví dụ: 01"></div>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                <button id="btn-init-practice" class="btn btn-gray">LUYỆN TẬP</button>
+                <button id="btn-init-test" class="btn btn-fire">KIỂM TRA</button>
+            </div>
+        </div>
+    </section>
 
-    function showQ() {
-        clearInterval(timer);
-        const q = quiz[currentIdx];
-        const area = document.getElementById('q-area');
-        area.innerHTML = `<div class="q-text">Câu ${currentIdx + 1}. ${q.intro || q.q}</div>`;
+    <section id="screen-quiz" class="screen">
+        <div id="quiz-content"></div>
+        <div style="display:flex; justify-content: space-between; margin-top: 30px; gap: 15px;">
+            <button id="btn-prev" class="btn btn-gray">QUAY LẠI</button>
+            <button class="btn btn-fire" id="btn-next" style="flex:1">TIẾP THEO</button>
+            <button id="btn-finish" class="btn" style="background:var(--success); color:white; display:none">HOÀN THÀNH 🏁</button>
+        </div>
+    </section>
 
-        if(currentIdx < 12) { // Part I
-            timeLeft = 90;
-            ['a','b','c','d'].forEach(o => {
-                const btn = document.createElement('div');
-                btn.className = `opt-btn ${userAnswers[currentIdx] === o ? 'active' : ''}`;
-                btn.innerText = `${o.toUpperCase()}. ${q[o]}`;
-                btn.onclick = () => { userAnswers[currentIdx] = o; showQ(); };
-                area.appendChild(btn);
-            });
-        } else if(currentIdx < 16) { // Part II
-            timeLeft = 120;
-            if(!userAnswers[currentIdx]) userAnswers[currentIdx] = [null, null, null, null];
-            q.items.forEach((item, i) => {
-                const row = document.createElement('div');
-                row.className = 'tf-row';
-                row.innerHTML = `<span>${String.fromCharCode(97+i)}) ${item.text}</span>`;
-                const group = document.createElement('div');
-                group.className = 'tf-btns';
-                const bT = document.createElement('button'); bT.innerText = "ĐÚNG";
-                bT.className = `btn-true ${userAnswers[currentIdx][i] === true ? 'active' : ''}`;
-                bT.onclick = () => { userAnswers[currentIdx][i] = true; showQ(); };
-                const bF = document.createElement('button'); bF.innerText = "SAI";
-                bF.className = `btn-false ${userAnswers[currentIdx][i] === false ? 'active' : ''}`;
-                bF.onclick = () => { userAnswers[currentIdx][i] = false; showQ(); };
-                group.append(bT, bF); row.append(group); area.appendChild(row);
-            });
-        } else { // Part III
-            timeLeft = 120;
-            const input = document.createElement('input');
-            input.value = userAnswers[currentIdx] || '';
-            input.onchange = (e) => userAnswers[currentIdx] = e.target.value;
-            area.appendChild(input);
+    <section id="screen-result" class="screen">
+        <div class="card" style="background: linear-gradient(135deg, #1e40af, #1e1b4b); color: white; text-align: center; padding: 40px 20px;">
+            <h2 id="res-name" class="fire-text">HỌC SINH</h2>
+            <div id="res-meta">Lớp</div>
+            <div style="margin: 30px 0;">
+                <div id="final-score" style="font-size: 6rem; font-weight: 900; color: #fff; text-shadow: 0 0 20px rgba(255,255,255,0.5);">0.0</div>
+                <div id="my-rank-text" style="margin-top: 10px; font-weight: bold; color: #ffae00; font-size: 1.8rem;">HẠNG ...</div>
+            </div>
+            <div id="rank-container"><div id="rank-badge" class="rank-badge">XẾP LOẠI</div></div>
+        </div>
+        <div style="display:flex; flex-direction: column; gap: 15px; margin-top: 20px;">
+            <button id="btn-view-review" class="btn btn-fire">GIẢI THÍCH CHI TIẾT 📖</button>
+            <button class="btn btn-gray" onclick="location.reload()">LÀM ĐỀ KHÁC</button>
+        </div>
+        <div id="review-area" style="display:none; margin-top: 30px;">
+            <h2 id="review-heading" style="text-align:center; color: var(--primary); margin: 30px 0;">CHI TIẾT BÀI LÀM</h2>
+            <div id="review-content"></div>
+        </div>
+    </section>
+
+    <!-- Màn hình Admin -->
+    <section id="screen-admin" class="screen">
+        <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h2 class="fire-text" style="margin:0; font-size: 1.5rem;">📊 QUẢN LÝ KẾT QUẢ</h2>
+            <button id="btn-admin-close" class="btn btn-gray" style="padding: 5px 15px; font-size: 0.7rem;">THOÁT</button>
+        </div>
+        <div class="stats-summary" id="admin-stats" style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px;"></div>
+        <div class="admin-controls">
+            <div style="flex:1; min-width: 150px;">
+                <label style="font-size: 0.7rem; font-weight: bold;">SẮP XẾP:</label>
+                <select id="admin-sort" style="width:100%; padding:8px; border-radius:5px;">
+                    <option value="score_desc">Điểm cao nhất</option>
+                    <option value="date_new">Mới nhất</option>
+                    <option value="duration_fast">Làm nhanh nhất</option>
+                </select>
+            </div>
+            <div style="flex:1; min-width: 150px;">
+                <label style="font-size: 0.7rem; font-weight: bold;">LỌC LỚP:</label>
+                <select id="admin-filter-class" style="width:100%; padding:8px; border-radius:5px;">
+                    <option value="all">Tất cả lớp</option>
+                </select>
+            </div>
+            <button id="btn-admin-refresh" class="btn" style="background:var(--secondary); color:white; font-size:0.8rem">LÀM MỚI 🔄</button>
+            <button id="btn-export-excel" class="btn" style="background:var(--success); color:white; font-size:0.8rem">XUẤT EXCEL 📗</button>
+        </div>
+        <div class="admin-table-container"><table class="admin-table"><thead><tr><th>Hạng</th><th>SBD</th><th>Họ tên</th><th>Lớp</th><th>Điểm</th><th>TG Làm</th><th>Ngày nộp</th><th>Xoá</th></tr></thead><tbody id="admin-list-body"></tbody></table></div>
+    </section>
+
+    <footer>
+        <div style="font-weight: 800; color: #cbd5e0; margin-bottom: 5px;">HỆ THỐNG LUYỆN TẬP VẬT LÝ 9</div>
+        <div style="font-size: 0.85rem;">Bản quyền thuộc về Trường THCS Thuỷ Phương, Thành phố Huế</div>
+    </footer>
+</div>
+
+<!-- Modal xác thực admin -->
+<div id="admin-auth-modal" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:20000; display:none; justify-content:center; align-items:center;">
+    <div class="card" style="width:100%; max-width:400px; text-align:center;">
+        <h2 style="color: var(--primary)">Xác minh Quản trị</h2>
+        <input type="password" id="admin-pw" placeholder="Mật khẩu..." style="margin-bottom:20px;">
+        <div style="display:flex; gap:10px;">
+            <button class="btn btn-gray" style="flex:1" id="btn-auth-cancel">HỦY</button>
+            <button class="btn btn-fire" style="flex:1" id="btn-auth-confirm">XÁC NHẬN</button>
+        </div>
+    </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
+import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
+import { getFirestore, collection, addDoc, getDocs, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
+
+const firebaseConfig = {
+    apiKey: "AIzaSyDg4Q6rsrvPhY31oCpL4DAAjTKlgjJN1c0",
+    authDomain: "khtn9-5c1f4.firebaseapp.com",
+    projectId: "khtn9-5c1f4",
+    storageBucket: "khtn9-5c1f4.firebasestorage.app",
+    messagingSenderId: "498407772914",
+    appId: "1:498407772914:web:8ec0ed711675a96a42366b",
+    measurementId: "G-GPZSP2DR92"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+const appId_fixed = 'kham-pha-vat-ly-9';
+const collectionName = 'quiz_results'; 
+
+let currentUser = null, quizStartTime = 0, isQuizRunning = false, mode = '', currentIdx = 0, userAnswers = {}, timeLeft = 0, timerInt, currentExam = [];
+const audioPing = new Audio('https://www.soundjay.com/buttons/sounds/button-16.mp3');
+const audioFinish = new Audio('https://www.soundjay.com/misc/sounds/bell-ringing-05.mp3');
+
+signInAnonymously(auth).catch(e => console.error(e));
+onAuthStateChanged(auth, user => currentUser = user);
+
+const QUESTION_BANK = {
+    mcq: [
+        { q: "Đại lượng đặc trưng cho mức độ cản trở dòng điện của vật dẫn được gọi là", a: "Điện trở.", o: ["Cường độ dòng điện.", "Hiệu điện thế.", "Điện trở.", "Công suất điện."], e: "Điện trở biểu thị tính chất cản trở dòng điện của dây dẫn." },
+        { q: "Trong hệ SI, đơn vị của điện trở là gì?", a: "Ohm ($\\Omega$)", o: ["Ampere (A)", "Volt (V)", "Ohm ($\\Omega$)", "Watt (W)"], e: "Ohm ($\\Omega$) là đơn vị chuẩn đo điện trở." },
+        { q: "Nội dung định luật Ohm cho biết cường độ dòng điện chạy qua một dây dẫn", a: "tỉ lệ thuận với hiệu điện thế giữa hai đầu dây.", o: ["tỉ lệ thuận với điện trở.", "tỉ lệ nghịch với hiệu điện thế.", "tỉ lệ thuận với hiệu điện thế giữa hai đầu dây.", "không phụ thuộc vật liệu."], e: "Hệ thức $I = U/R$ cho thấy $I$ và $U$ tỉ lệ thuận." },
+        { q: "Nếu hiệu điện thế $U$ tăng 3 lần thì cường độ dòng điện $I$ qua điện trở sẽ", a: "tăng lên 3 lần.", o: ["giảm 3 lần.", "tăng lên 3 lần.", "không đổi.", "tăng 9 lần."], e: "$I$ tỉ lệ thuận with $U$ theo định luật Ohm." },
+        { q: "Đồ thị biểu diễn mối quan hệ giữa $I$ and $U$ của một điện trở là", a: "một đường thẳng đi qua gốc tọa độ.", o: ["đường cong parabol.", "một đường thẳng đi gốc tọa độ.", "đường thẳng song song trục hoành.", "đường tròn."], e: "$I = (1/R) \\cdot U$ là phương trình đường thẳng qua gốc O." },
+        { q: "Công thức xác định điện trở của một dây dẫn hình trụ, đồng chất là", a: "$R = \\rho\\frac{l}{S}$", o: ["$R = \\rho\\frac{S}{l}$", "$R = \\rho\\frac{l}{S}$", "$R = \\frac{S}{\\rho l}$", "$R = \\frac{l}{\\rho S}$"], e: "Điện trở $R$ tỉ lệ thuận với chiều dài $l$ và tỉ lệ nghịch với tiết diện $S$." },
+        { q: "Dây dẫn $18\\Omega$ cắt làm 3 phần bằng nhau thì mỗi phần có điện trở là", a: "6 $\\Omega$", o: ["54 $\\Omega$", "6 $\\Omega$", "21 $\\Omega$", "15 $\\Omega$"], e: "$R$ tỉ lệ thuận với chiều dài $l$." },
+        { q: "Khi cùng đặt vào hiệu điện thế $U$ cho hai điện trở $R_1$ và $R_2$ với $R_1 = 3 R_2$. So sánh dòng điện?", a: "$I_2 = 3 I_1$", o: ["$I_1 = 3 I_2$", "$I_2 = 3 I_1$", "$I_1 = I_2$", "$I_1 = 9 I_2$"], e: "$I$ tỉ lệ nghịch với $R$." },
+        { q: "Đối với đoạn mạch gồm hai điện trở $R_1$ and $R_2$ mắc nối tiếp, hệ thức đúng là", a: "$R_{tđ} = R_1 + R_2$", o: ["$R_{tđ} = R_1 - R_2$", "$R_{tđ} = R_1 + R_2$", "$R_{tđ} = \\frac{R_1 R_2}{R_1 + R_2}$", "$\\frac{1}{R_{tđ}} = \\frac{1}{R_1} + \\frac{1}{R_2}$"], e: "Mạch nối tiếp có tổng trở bằng tổng điện trở thành phần." },
+        { q: "Đặt $U = 12V$ vào $R = 10\\Omega$. Cường độ dòng điện là", a: "1,2 A", o: ["1,2 A", "0,83 A", "120 A", "2 A"], e: "$I = U/R = 12/10 = 1,2$ A." },
+        { q: "Điện trở suất của một vật liệu được ký hiệu bằng chữ cái Hy Lạp nào?", a: "$\\rho$ (Rho)", o: ["$\\lambda$ (Lambda)", "$\\rho$ (Rho)", "$\\Omega$ (Ohm)", "$\\pi$ (Pi)"], e: "Ký hiệu chuẩn cho điện trở suất là $\\rho$." },
+        { q: "Hai dây sắt cùng dài $l$, dây 1 có $S_1 = 1mm^2$, dây 2 có $S_2 = 2mm^2$. So sánh điện trở?", a: "$R_1 = 2 R_2$", o: ["$R_1 = 2 R_2$", "$R_2 = 2 R_1$", "$R_1 = R_2$", "$R_1 = 4 R_2$"], e: "Điện trở tỉ lệ nghịch với tiết diện." }
+    ],
+    tf: [
+        { ctx: "Một đoạn mạch có điện trở R không đổi, hiệu điện thế là U.", sts: [ 
+            { l: "a)", t: "Cường độ dòng điện I tỉ lệ thuận với hiệu điện thế U.", a: true }, 
+            { l: "b)", t: "Khi điện trở R tăng lên 2 lần và U giữ nguyên thì I tăng 2 lần.", a: false }, 
+            { l: "c)", t: "Đơn vị của cường độ dòng điện I là Ampere (A).", a: true }, 
+            { l: "d)", t: "Công thức của định luật Ohm là $I = U/R$.", a: true } 
+        ], e: "Theo định luật Ohm, cường độ dòng điện tỉ lệ nghịch với điện trở." },
+        { ctx: "Mắc nối tiếp điện trở $R_1 = 15\\Omega$ and biến trở $R$ vào nguồn $U = 9V$.", sts: [ 
+            { l: "a)", t: "Điện trở đoạn mạch có tác dụng cản trở dòng điện.", a: true }, 
+            { l: "b)", t: "Nếu điều chỉnh $R$ tăng lên thì dòng điện mạch chính sẽ giảm.", a: true }, 
+            { l: "c)", t: "Khi $R = 30\\Omega$, tổng trở mạch là $45\\Omega$.", a: true }, 
+            { l: "d)", t: "Dòng điện chạy qua $R_1$ lúc này là 0,2 A.", a: true } 
+        ], e: "Áp dụng định luật Ohm cho đoạn mạch nối tiếp." },
+        { ctx: "Cho ba điện trở $R_1=R_2=R_3=30\\Omega$ mắc song song vào nguồn $U=10V$.", sts: [ 
+            { l: "a)", t: "Điện trở tương đương của mạch bằng $10 \\Omega$.", a: true }, 
+            { l: "b)", t: "Cường độ dòng điện mạch chính là 1,0 A.", a: true }, 
+            { l: "c)", t: "Nếu tháo bớt một điện trở ra thì tổng trở mạch giảm.", a: false }, 
+            { l: "d)", t: "Dòng điện qua mỗi nhánh là 0,33 A.", a: true } 
+        ], e: "Tháo nhánh song song làm tổng trở tăng lên." },
+        { ctx: "Bản chất dòng điện chạy qua vật dẫn kim loại.", sts: [ 
+            { l: "a)", t: "Dòng điện là dòng dịch chuyển có hướng của các điện tích.", a: true }, 
+            { l: "b)", t: "Trong kim loại, các điện tích tự do là electron mang điện âm.", a: true }, 
+            { l: "c)", t: "Chiều quy ước của dòng điện là chiều từ cực âm sang cực dương.", a: false }, 
+            { l: "d)", t: "Electron dịch chuyển ngược chiều quy ước của dòng điện.", a: true } 
+        ], e: "Chiều dòng điện quy ước từ dương sang âm." }
+    ],
+    short: [
+        { q: "Mắc đèn $24\\Omega$ vào nguồn $12V$. Tính cường độ dòng điện (A)?", a: "0,5", e: "Công thức: $I = \\frac{U}{R}$" },
+        { q: "Đặt hiệu điện thế $6V$ thì dòng điện qua dây là $0,1A$. Tính điện trở dây dẫn ($\\Omega$)?", a: "60", e: "Công thức: $R = \\frac{U}{I}$" },
+        { q: "Điện trở $40\\Omega$ chịu tối đa 0,5A. Hiệu điện thế tối đa là bao nhiêu Volt (V)?", a: "20", e: "Công thức: $U = I \\cdot R$" },
+        { q: "Dây 12 ohm bị kéo giãn dài gấp đôi (thể tích không đổi). Tính điện trở mới (ohm)?", a: "48", e: "Công thức: $R = \\rho\\frac{l}{S}$" }
+    ]
+};
+
+// --- REALISTIC STYLIZED FIRE ANIMATION (5S) ---
+let fireRequest;
+function startFire() {
+    const canvas = document.getElementById('fire-canvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    let flames = [];
+    class Flame {
+        constructor() {
+            this.x = Math.random() * canvas.width;
+            this.y = canvas.height + 100;
+            this.size = Math.random() * 100 + 60;
+            this.vx = Math.random() * 2 - 1;
+            this.vy = Math.random() * -4 - 3;
+            this.life = 1.0;
+            this.decay = Math.random() * 0.01 + 0.006;
         }
-        startTimer();
-        document.getElementById('prev').style.visibility = currentIdx === 0 ? 'hidden' : 'visible';
-        document.getElementById('next').innerText = currentIdx === 19 ? 'NỘP BÀI' : 'Tiếp theo';
+        update() {
+            this.x += this.vx + Math.sin(this.life * 10) * 1.5;
+            this.y += this.vy;
+            this.life -= this.decay;
+            this.size *= 0.992;
+        }
+        draw() {
+            if (this.life <= 0) return;
+            ctx.save();
+            ctx.translate(this.x, this.y);
+            ctx.beginPath();
+            ctx.moveTo(0, 0);
+            ctx.bezierCurveTo(-this.size/2.5, -this.size/2, -this.size/3, -this.size*0.8, 0, -this.size * 1.3);
+            ctx.bezierCurveTo(this.size/3, -this.size*0.8, this.size/2.5, -this.size/2, 0, 0);
+            let color = this.life > 0.8 ? `rgba(255, 255, 255, ${this.life})` : (this.life > 0.5 ? `rgba(255, 220, 0, ${this.life})` : (this.life > 0.2 ? `rgba(255, 80, 0, ${this.life})` : `rgba(200, 0, 0, ${this.life})`));
+            ctx.fillStyle = color;
+            ctx.shadowBlur = this.size / 3;
+            ctx.shadowColor = "#ff4e00";
+            ctx.fill();
+            ctx.restore();
+        }
     }
-
-    function startTimer() {
-        document.getElementById('timer').innerText = `Thời gian: ${timeLeft}s`;
-        timer = setInterval(() => {
-            timeLeft--;
-            document.getElementById('timer').innerText = `Thời gian: ${timeLeft}s`;
-            if(timeLeft <= 0) move(1);
-        }, 1000);
+    function animate() {
+        if (document.getElementById('wish-overlay').style.display === 'none') return;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        if (flames.length < 55) flames.push(new Flame());
+        for (let i = 0; i < flames.length; i++) {
+            flames[i].update();
+            flames[i].draw();
+            if (flames[i].life <= 0) { flames.splice(i, 1); i--; }
+        }
+        fireRequest = requestAnimationFrame(animate);
     }
+    animate();
+}
 
-    function move(step) {
-        if(step === 1 && currentIdx === 19) return finish();
-        currentIdx += step;
-        showQ();
-    }
+const initGame = (m) => {
+    const name = document.getElementById('username').value.trim();
+    const cls = document.getElementById('user_class').value.trim();
+    const sbd = document.getElementById('user_sbd').value.trim();
+    if(!name || !cls || !sbd) { document.getElementById('start-error').style.display = 'block'; window.scrollTo(0,0); return; }
+    document.getElementById('start-error').style.display = 'none';
+    mode = m;
+    currentExam = [
+        ...shuffle([...QUESTION_BANK.mcq]).slice(0, 12).map((q, i) => ({...q, id: `p1_${i}`, type: 'mcq', section: 'Phần I. Đa lựa chọn', displayNum: i+1})),
+        ...shuffle([...QUESTION_BANK.tf]).slice(0, 4).map((q, i) => ({...q, id: `p2_${i}`, type: 'tf', section: 'Phần II. Đúng/Sai', displayNum: i+1})),
+        ...shuffle([...QUESTION_BANK.short]).slice(0, 4).map((q, i) => ({...q, id: `p3_${i}`, type: 'short', section: 'Phần III. Trả lời ngắn', displayNum: i+1}))
+    ];
+    userAnswers = {}; currentIdx = 0; timeLeft = 2700; quizStartTime = Date.now();
+    document.getElementById('wish-overlay').style.display = 'flex';
+    document.getElementById('wish-cheat-info').style.display = (mode === 'test') ? 'block' : 'none';
+    startFire();
+    if(mode === 'test') try { document.documentElement.requestFullscreen(); } catch(e) {}
+    setTimeout(() => {
+        document.getElementById('wish-overlay').style.display = 'none';
+        cancelAnimationFrame(fireRequest);
+        isQuizRunning = true;
+        document.getElementById('main-header').style.display = 'flex';
+        showScreen('screen-quiz'); renderQuestion(); startTimer();
+    }, 5000);
+};
 
-    function finish() {
-        let score = 0;
-        quiz.forEach((q, i) => {
-            if(i < 12) {
-                if(userAnswers[i] === q.correct) score += 0.25;
-            } else if(i < 16) {
-                let count = 0;
-                q.items.forEach((item, j) => { if(userAnswers[i] && userAnswers[i][j] === item.correct) count++; });
-                const points = [0, 0.0625, 0.125, 0.25, 0.5];
-                score += points[count];
-            } else {
-                if(userAnswers[i] && userAnswers[i].trim() === q.correct) score += 0.5;
-            }
+function renderQuestion() {
+    const q = currentExam[currentIdx];
+    const container = document.getElementById('quiz-content');
+    const labels = ['A', 'B', 'C', 'D'];
+    let html = `<div class="section-title">${q.section}</div><div class="card">`;
+    if(mode === 'practice') html += `<button class="btn-hint" id="hint-trigger">XEM GỢI Ý 💡</button><div id="hint-box" class="hint-box"><b>Hướng dẫn giải:</b> ${q.e}</div>`;
+    if(q.type === 'mcq') {
+        html += `<h3>Câu ${q.displayNum}. ${q.q}</h3>`;
+        if(!q.shuffledOptions) q.shuffledOptions = shuffle([...q.o]);
+        q.shuffledOptions.forEach((o, idx) => {
+            const isSelected = userAnswers[q.id] === o;
+            html += `<div class="option ${isSelected?'selected':''}" data-ans="${o.replace(/"/g, '&quot;')}"><b>${labels[idx]}.</b> ${o}</div>`;
         });
-
-        document.getElementById('game-container').style.display = 'none';
-        document.getElementById('result-screen').style.display = 'flex';
-        document.getElementById('final-score').innerText = score.toFixed(2);
-        
-        let r = "CHƯA ĐẠT";
-        if(score >= 6) r = "XUẤT SẮC";
-        else if(score >= 5) r = "GIỎI";
-        else if(score >= 4) r = "KHÁ";
-        else if(score >= 3) r = "ĐẠT";
-        document.getElementById('rank').innerText = "Xếp loại: " + r;
+    } else if(q.type === 'tf') {
+        html += `<h3>Câu ${q.displayNum}</h3><div style="background:#f1f5f9; padding:15px; border-radius:12px; margin-bottom:15px; font-style:italic;">${q.ctx}</div>`;
+        q.sts.forEach((st, si) => {
+            let val = (userAnswers[q.id]||{})[si];
+            html += `<div class="tf-row"><span style="flex:1"><b>${st.l}</b> ${st.t}</span><div style="display:flex; gap:10px;"><button class="tf-btn ${val===true?'active-t':''}" data-si="${si}" data-val="true">Đúng</button><button class="tf-btn ${val===false?'active-f':''}" data-si="${si}" data-val="false">Sai</button></div></div>`;
+        });
+    } else {
+        html += `<h3>Câu ${q.displayNum}. ${q.q}</h3><p style="color:var(--danger); font-size:0.75rem; font-weight:bold; margin:10px 0;">lưu ý: đáp án dưới 4 kí tự và sử dụng dấu "," trường hợp số thập phân</p><input type="text" id="short-input" value="${userAnswers[q.id]||''}" placeholder="Ví dụ: 0,5">`;
     }
+    container.innerHTML = html + `</div>`;
+    if(q.type === 'mcq') {
+        container.querySelectorAll('.option').forEach(el => el.onclick = () => { userAnswers[q.id] = el.getAttribute('data-ans'); audioPing.play().catch(()=>{}); renderQuestion(); });
+    } else if(q.type === 'tf') {
+        container.querySelectorAll('.tf-btn').forEach(el => el.onclick = () => {
+            const si = el.getAttribute('data-si'), val = el.getAttribute('data-val') === 'true';
+            if(!userAnswers[q.id]) userAnswers[q.id] = {}; userAnswers[q.id][si] = val; audioPing.play().catch(()=>{}); renderQuestion();
+        });
+    } else {
+        const inp = document.getElementById('short-input');
+        if(inp) { inp.focus(); inp.oninput = (e) => userAnswers[q.id] = e.target.value; }
+    }
+    const hb = document.getElementById('hint-trigger');
+    if(hb) hb.onclick = async () => { const b = document.getElementById('hint-box'); b.style.display = (b.style.display==='none'?'block':'none'); if(b.style.display==='block'&&window.MathJax) await MathJax.typesetPromise([b]); };
+    document.getElementById('btn-prev').style.visibility = currentIdx === 0 ? 'hidden' : 'visible';
+    document.getElementById('btn-next').style.display = currentIdx === currentExam.length - 1 ? 'none' : 'block';
+    document.getElementById('btn-finish').style.display = currentIdx === currentExam.length - 1 ? 'block' : 'none';
+    if(window.MathJax) MathJax.typesetPromise();
+}
+
+async function calculateResult() {
+    if(!isQuizRunning) return;
+    isQuizRunning = false; clearInterval(timerInt); audioFinish.play().catch(()=>{});
+    const dur = Math.floor((Date.now() - quizStartTime) / 1000);
+    let score = 0;
+    const tfMap = {0:0, 1:0.0625, 2:0.125, 3:0.25, 4:0.5};
+    currentExam.forEach(q => {
+        const norm = (s) => (s || "").toString().trim().replace(',','.');
+        if(q.type === 'mcq' && norm(userAnswers[q.id]||'') === norm(q.a)) score += 0.25;
+        else if(q.type === 'tf') {
+            let cp = 0, u = userAnswers[q.id] || {};
+            q.sts.forEach((st, si) => { if(u[si] === st.a) cp++; });
+            score += tfMap[cp] || 0;
+        } else if(q.type === 'short' && norm(userAnswers[q.id]||'') === norm(q.a)) score += 0.5;
+    });
+    const fs = parseFloat(Math.min(7, score).toFixed(1));
+    showScreen('screen-result'); document.getElementById('main-header').style.display = 'none';
+    document.getElementById('final-score').innerText = fs.toFixed(1);
+    document.getElementById('res-name').innerText = document.getElementById('username').value.toUpperCase();
+    document.getElementById('res-meta').innerText = `Lớp ${document.getElementById('user_class').value} | SBD ${document.getElementById('user_sbd').value}`;
+    let rb = document.getElementById('rank-badge'), txt = 'CHƯA ĐẠT', col = '#64748b';
+    if(fs >= 6) { txt='XUẤT SẮC'; col='#f59e0b'; } else if(fs >= 5) { txt='GIỎI'; col='#10b981'; } else if(fs >= 4) { txt='KHÁ'; col='#3b82f6'; } else if(fs >= 3) { txt='ĐẠT'; col='#8b5cf6'; }
+    rb.innerText = txt; rb.style.background = col;
+    if(fs >= 5) confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+    if(currentUser) {
+        try { await addDoc(collection(db, 'artifacts', appId_fixed, 'public', 'data', collectionName), { name: document.getElementById('username').value, sbd: document.getElementById('user_sbd').value || '?', class: document.getElementById('user_class').value || '?', score: fs, duration: dur, timestamp: new Date().toISOString() }); } catch(e) {}
+    }
+    fetchRankAndLeaderboard(fs);
+    if (document.fullscreenElement) { document.exitFullscreen().catch(()=>{}); }
+}
+
+async function fetchRankAndLeaderboard(myScore) {
+    try {
+        const snap = await getDocs(collection(db, 'artifacts', appId_fixed, 'public', 'data', collectionName));
+        let list = []; snap.forEach(d => list.push(d.data()));
+        list.sort((a,b) => b.score - a.score || a.duration - b.duration);
+        const myRank = list.findIndex(r => r.name === document.getElementById('username').value && r.score === myScore) + 1;
+        document.getElementById('my-rank-text').innerText = `HẠNG ${myRank} / ${list.length}`;
+    } catch (e) {}
+}
+
+async function renderAdmin() {
+    const listBody = document.getElementById('admin-list-body'), statsBox = document.getElementById('admin-stats');
+    listBody.innerHTML = "<tr><td colspan='8'>Đang tải dữ liệu...</td></tr>";
+    try {
+        const snap = await getDocs(collection(db, 'artifacts', appId_fixed, 'public', 'data', collectionName));
+        let data = []; snap.forEach(d => data.push({id: d.id, ...d.data()}));
+        const classes = [...new Set(data.map(i => i.class))].sort();
+        const fSelect = document.getElementById('admin-filter-class');
+        const oldVal = fSelect.value;
+        fSelect.innerHTML = '<option value="all">Tất cả lớp</option>' + classes.map(c => `<option value="${c}" ${c===oldVal?'selected':''}>Lớp ${c}</option>`).join('');
+        if(fSelect.value !== 'all') data = data.filter(i => i.class === fSelect.value);
+        const sVal = document.getElementById('admin-sort').value;
+        data.sort((a,b) => {
+            if(sVal === 'score_desc') return b.score - a.score || a.duration - b.duration;
+            if(sVal === 'date_new') return new Date(b.timestamp) - new Date(a.timestamp);
+            if(sVal === 'duration_fast') return a.duration - b.duration;
+            return 0;
+        });
+        let s = { xs: 0, g: 0, k: 0, d: 0, cd: 0 };
+        data.forEach(i => { if(i.score >= 6) s.xs++; else if(i.score >= 5) s.g++; else if(i.score >= 4) s.k++; else if(i.score >= 3) s.d++; else s.cd++; });
+        statsBox.innerHTML = `<div class="stat-box"><b>${s.xs}</b><br><small>X.Sắc</small></div><div class="stat-box"><b>${s.g}</b><br><small>Giỏi</small></div><div class="stat-box"><b>${s.k}</b><br><small>Khá</small></div><div class="stat-box"><b>${s.d}</b><br><small>Đạt</small></div><div class="stat-box" style="border-color:red"><b>${s.cd}</b><br><small>C.Đạt</small></div>`;
+        listBody.innerHTML = data.map((i, idx) => `<tr><td>${idx+1}</td><td>${i.sbd}</td><td>${i.name}</td><td>${i.class}</td><td><b>${(i.score||0).toFixed(1)}</b></td><td>${i.duration}s</td><td>${new Date(i.timestamp).toLocaleDateString()}</td><td><button style="background:red; color:white; border:none; padding:3px 8px; border-radius:4px; cursor:pointer" class="btn-del" data-id="${i.id}">X</button></td></tr>`).join('');
+        listBody.querySelectorAll('.btn-del').forEach(b => b.onclick = () => deleteEntry(b.dataset.id));
+    } catch(e) { listBody.innerHTML = "<tr><td colspan='8'>Lỗi kết nối Firebase.</td></tr>"; }
+}
+
+async function deleteEntry(id) { if(confirm("Xóa kết quả này?")) { await deleteDoc(doc(db, 'artifacts', appId_fixed, 'public', 'data', collectionName, id)); renderAdmin(); } }
+
+document.getElementById('btn-admin-open').onclick = () => document.getElementById('admin-auth-modal').style.display = 'flex';
+document.getElementById('btn-auth-cancel').onclick = () => document.getElementById('admin-auth-modal').style.display = 'none';
+document.getElementById('btn-auth-confirm').onclick = () => {
+    if(document.getElementById('admin-pw').value === "THCSTHUYPHUONG") { document.getElementById('admin-auth-modal').style.display='none'; showScreen('screen-admin'); renderAdmin(); } else alert("Sai mật khẩu!");
+};
+
+document.getElementById('btn-init-practice').onclick = () => initGame('practice');
+document.getElementById('btn-init-test').onclick = () => initGame('test');
+document.getElementById('btn-prev').onclick = () => { if(currentIdx > 0) { currentIdx--; renderQuestion(); window.scrollTo(0,0); } };
+document.getElementById('btn-next').onclick = () => { if(currentIdx < currentExam.length - 1) { currentIdx++; renderQuestion(); window.scrollTo(0,0); } };
+document.getElementById('btn-finish').onclick = () => document.getElementById('confirm-finish-modal').style.display = 'flex';
+document.getElementById('btn-modal-cancel').onclick = () => document.getElementById('confirm-finish-modal').style.display = 'none';
+document.getElementById('btn-modal-confirm').onclick = () => { document.getElementById('confirm-finish-modal').style.display = 'none'; calculateResult(); };
+document.getElementById('btn-admin-close').onclick = () => { document.getElementById('main-header').style.display = 'none'; showScreen('screen-start'); };
+document.getElementById('btn-admin-refresh').onclick = () => renderAdmin();
+document.getElementById('btn-cheat-submit').onclick = () => { document.getElementById('cheat-modal').style.display = 'none'; calculateResult(); };
+
+document.getElementById('btn-view-review').onclick = () => {
+    const area = document.getElementById('review-area'), content = document.getElementById('review-content'), labels = ['A', 'B', 'C', 'D'];
+    area.style.display = 'block'; 
+    let h = '';
+    currentExam.forEach(q => {
+        const norm = (s) => (s || "").toString().trim().replace(',','.');
+        let qTitleText = q.type === 'tf' ? `Câu ${q.displayNum} (Đúng/Sai)` : `Câu ${q.displayNum}. ${q.q}`;
+        h += `<div class="card" style="border-left: 8px solid var(--primary)"><h3>${qTitleText}</h3>`;
+        if(q.type === 'mcq') {
+            (q.shuffledOptions || q.o).forEach((o, idx) => {
+                const isC = norm(o) === norm(q.a), isU = userAnswers[q.id] === o;
+                h += `<div class="option ${isC?'correct':(isU?'wrong':'')}"><b>${labels[idx]}.</b> ${o} ${isC?'✓':(isU?'✗':'')}</div>`;
+            });
+            if(norm(userAnswers[q.id]||'') !== norm(q.a)) h += `<div class="review-choice-box review-wrong">Bạn chọn: <b>${userAnswers[q.id]||'Chưa chọn'}</b>. Đáp án: <b style="color:#10b981">${q.a}</b></div>`;
+        } else if(q.type === 'tf') {
+            h += `<div style="background:#f1f5f9; padding:15px; border-radius:12px; margin-bottom:15px; font-style:italic;">${q.ctx}</div>`;
+            q.sts.forEach((st, si) => {
+                let uV = (userAnswers[q.id]||{})[si], isC = (uV === st.a);
+                h += `<div class="tf-row"><span>${st.l} ${st.t}</span><div style="font-size:0.8rem; text-align:right;"><span style="color:${isC?'#10b981':'#ef4444'}">Bạn: <b>${uV===true?'Đúng':(uV===false?'Sai':'?')}</b></span><br><span>Đáp án: <b>${st.a?'Đúng':'Sai'}</b> ${isC?'✓':'✗'}</span></div></div>`;
+            });
+        } else {
+            const isC = norm(userAnswers[q.id]||'') === norm(q.a);
+            h += `<p>Bạn nhập: <b style="color:${isC?'#10b981':'#ef4444'}">${userAnswers[q.id]||'Trống'}</b></p><p>Đáp án đúng: <b style="color:#10b981">${q.a}</b> ${isC?'✓':'✗'}</p>`;
+        }
+        h += `<div class="explanation"><b>Giải thích:</b> ${q.e}</div></div>`;
+    });
+    content.innerHTML = h; 
+    const target = document.getElementById('review-heading');
+    if (target) {
+        setTimeout(() => {
+            const yOffset = -20; 
+            const y = target.getBoundingClientRect().top + window.pageYOffset + yOffset;
+            window.scrollTo({ top: y, behavior: 'smooth' });
+            if(window.MathJax) MathJax.typesetPromise([content]);
+        }, 150);
+    }
+};
+
+document.getElementById('btn-export-excel').onclick = async () => {
+    const snap = await getDocs(collection(db, 'artifacts', appId_fixed, 'public', 'data', collectionName));
+    let rows = []; snap.forEach(d => rows.push(d.data()));
+    const ws = XLSX.utils.json_to_sheet(rows), wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "KetQua");
+    XLSX.writeFile(wb, `KetQua_Vly9_DienTro_${new Date().toLocaleDateString()}.xlsx`);
+};
+
+function showScreen(id) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); document.getElementById(id).classList.add('active'); }
+function shuffle(a) { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+function startTimer() { clearInterval(timerInt); timerInt = setInterval(() => { timeLeft--; const m = Math.floor(timeLeft/60), s = timeLeft%60, el = document.getElementById('timer'); if(el) el.innerText = `${m}:${s.toString().padStart(2,'0')}`; if(timeLeft <= 0) calculateResult(); }, 1000); }
+const triggerCheat = () => { if (isQuizRunning && mode === 'test') { document.getElementById('cheat-modal').style.display = 'flex'; calculateResult(); } };
+document.addEventListener('fullscreenchange', () => { if (!document.fullscreenElement && isQuizRunning && mode === 'test') triggerCheat(); });
+document.addEventListener('visibilitychange', () => { if(document.visibilityState === 'hidden') triggerCheat(); });
+window.addEventListener('blur', triggerCheat);
+window.onload = () => { document.getElementById('main-header').style.display = 'none'; if(localStorage.getItem('khtn9_u')) document.getElementById('username').value = localStorage.getItem('khtn9_u'); };
+document.getElementById('username').oninput = (e) => localStorage.setItem('khtn9_u', e.target.value);
 </script>
 </body>
 </html>
