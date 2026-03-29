@@ -21,8 +21,25 @@
             --primary: #1e40af; --secondary: #3b82f6; --success: #10b981; --danger: #ef4444; 
             --bg: #0f172a; --card: #ffffff; --text: #1e293b; --accent: #f59e0b;
         }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); margin: 0; user-select: none; overflow-x: hidden; -webkit-tap-highlight-color: transparent; }
-        .container { max-width: 900px; margin: 0 auto; min-height: 100vh; display: flex; flex-direction: column; position: relative; z-index: 1; }
+        
+        /* CHỐNG SAO CHÉP CẤP ĐỘ CSS */
+        * {
+            -webkit-user-select: none !important;
+            -moz-user-select: none !important;
+            -ms-user-select: none !important;
+            user-select: none !important;
+            -webkit-touch-callout: none !important; 
+        }
+
+        input {
+            -webkit-user-select: text !important;
+            -moz-user-select: text !important;
+            -ms-user-select: text !important;
+            user-select: text !important;
+        }
+
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); margin: 0; overflow-x: hidden; -webkit-tap-highlight-color: transparent; }
+        .container { max-width: 1000px; margin: 0 auto; min-height: 100vh; display: flex; flex-direction: column; position: relative; z-index: 1; }
         
         .fire-text {
             display: inline-block; color: #fff;
@@ -49,7 +66,6 @@
         }
         .timer { background: #fee2e2; color: #dc2626; padding: 8px 20px; border-radius: 20px; font-weight: bold; border: 2px solid #ef4444; font-size: 1.1rem; }
 
-        /* OVERLAY LỬA RỰC CHÁY (5 GIÂY) */
         #wish-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: #000; z-index: 10000;
@@ -61,7 +77,6 @@
         
         .wish-content { z-index: 10001; position: relative; width: 90%; max-width: 800px; }
         
-        /* CHỮ CỐ LÊN SIÊU SẮC NÉT - LOẠI BỎ BLUR */
         .wish-title {
             font-size: 5rem; font-weight: 900; color: #fff;
             text-transform: uppercase; margin: 0;
@@ -123,6 +138,9 @@
         .option.correct { background: #d1fae5; border-color: var(--success); color: #065f46; font-weight: bold; }
         .option.wrong { background: #fee2e2; border-color: var(--danger); color: #991b1b; }
         
+        .hint-box { background: #fef2f2; border: 2px dashed #ef4444; padding: 15px; margin-top: 10px; border-radius: 12px; font-size: 0.9rem; color: #b91c1c; display: none; font-style: italic; }
+        .btn-hint { background: #fee2e2; color: #b91c1c; border: 1px solid #ef4444; padding: 8px 15px; border-radius: 8px; font-size: 0.75rem; margin-bottom: 15px; cursor: pointer; font-weight: bold; text-transform: uppercase; }
+
         .tf-row { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px solid #f1f5f9; gap: 10px; }
         .tf-btn { border: 2px solid #cbd5e0; background: white; padding: 8px 18px; border-radius: 10px; cursor: pointer; font-weight: bold; min-width: 65px; transition: 0.2s; }
         .tf-btn.active-t { background: var(--success); color: white; border-color: var(--success); }
@@ -138,8 +156,9 @@
 
         .rank-badge { font-size: 1.5rem; font-weight: 900; margin-top: 15px; padding: 10px 25px; border-radius: 50px; display: inline-block; animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); color: white; }
         
+        .admin-controls { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; background: #f1f5f9; padding: 15px; border-radius: 15px; align-items: flex-end; }
         .admin-table-container { overflow-x: auto; background: white; border-radius: 10px; border: 1px solid #e2e8f0; }
-        .admin-table { width: 100%; border-collapse: collapse; min-width: 800px; }
+        .admin-table { width: 100%; border-collapse: collapse; min-width: 900px; }
         .admin-table th { background: var(--primary); color: white; padding: 12px; text-align: left; font-size: 0.85rem; }
         .admin-table td { padding: 12px; border-bottom: 1px solid #f1f5f9; font-size: 0.9rem; }
         .stat-box { flex: 1; min-width: 130px; background: white; padding: 15px; border-radius: 15px; text-align: center; border-bottom: 4px solid #cbd5e0; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
@@ -153,9 +172,14 @@
         .review-choice-box { margin-top: 10px; padding: 10px; border-radius: 8px; font-size: 0.9rem; }
         .review-correct { background: #d1fae5; color: #065f46; border: 1px solid #10b981; }
         .review-wrong { background: #fee2e2; color: #991b1b; border: 1px solid #ef4444; }
+        
+        .badge-mode { padding: 4px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: bold; color: white; text-transform: uppercase; }
+        .badge-test { background: var(--danger); }
+        .badge-practice { background: var(--secondary); }
     </style>
 </head>
-<body oncontextmenu="return false;">
+
+<body oncontextmenu="return false" oncopy="return false" oncut="return false" onpaste="return false" onselectstart="return false">
 
 <div id="wish-overlay">
     <canvas id="fire-canvas"></canvas>
@@ -170,7 +194,6 @@
 
 <button id="btn-admin-open" class="btn-admin-float">QUẢN TRỊ 🔐</button>
 
-<!-- Hộp thoại xác nhận nộp bài -->
 <div id="confirm-finish-modal" class="modal-overlay">
     <div class="modal-box">
         <h2 style="color: var(--primary)">Xác nhận nộp bài?</h2>
@@ -205,9 +228,9 @@
         <div class="card" style="max-width: 550px; margin: -40px auto 30px auto; position: relative; z-index: 2; display: block;">
             <h3 style="text-align:center; margin-bottom: 20px; color: var(--primary);">NHẬP THÔNG TIN THÍ SINH</h3>
             <p id="start-error" style="color: var(--danger); text-align: center; font-weight: bold; margin-bottom: 15px; display: none;">⚠️ Vui lòng điền đủ Họ tên, Lớp và SBD!</p>
-            <div style="margin-bottom: 15px;"><label style="font-size: 0.8rem; font-weight: bold; color: #64748b;">Họ và tên:</label><input type="text" id="username" placeholder="Nhập đầy đủ họ tên"></div>
-            <div style="margin-bottom: 15px;"><label style="font-size: 0.8rem; font-weight: bold; color: #64748b;">Lớp:</label><input type="text" id="user_class" placeholder="Ví dụ: 9A1"></div>
-            <div style="margin-bottom: 25px;"><label style="font-size: 0.8rem; font-weight: bold; color: #64748b;">Số báo danh:</label><input type="text" id="user_sbd" placeholder="Ví dụ: 01"></div>
+            <div style="margin-bottom: 15px;"><label style="font-size: 0.8rem; font-weight: bold; color: #64748b;">Họ và tên:</label><input type="text" id="username" placeholder="Nhập đầy đủ họ tên" oncopy="return false" oncut="return false" onpaste="return false"></div>
+            <div style="margin-bottom: 15px;"><label style="font-size: 0.8rem; font-weight: bold; color: #64748b;">Lớp:</label><input type="text" id="user_class" placeholder="Ví dụ: 9A1" oncopy="return false" oncut="return false" onpaste="return false"></div>
+            <div style="margin-bottom: 25px;"><label style="font-size: 0.8rem; font-weight: bold; color: #64748b;">Số báo danh:</label><input type="text" id="user_sbd" placeholder="Ví dụ: 01" oncopy="return false" oncut="return false" onpaste="return false"></div>
             
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
                 <button id="btn-init-practice" class="btn btn-gray">LUYỆN TẬP</button>
@@ -262,6 +285,14 @@
                 </select>
             </div>
             <div style="flex:1; min-width: 150px;">
+                <label style="font-size: 0.7rem; font-weight: bold;">LỌC CHẾ ĐỘ:</label>
+                <select id="admin-filter-mode" style="width:100%; padding:8px; border-radius:5px;">
+                    <option value="all">Tất cả</option>
+                    <option value="test">Kiểm tra</option>
+                    <option value="practice">Luyện tập</option>
+                </select>
+            </div>
+            <div style="flex:1; min-width: 150px;">
                 <label style="font-size: 0.7rem; font-weight: bold;">LỌC LỚP:</label>
                 <select id="admin-filter-class" style="width:100%; padding:8px; border-radius:5px;">
                     <option value="all">Tất cả lớp</option>
@@ -270,7 +301,16 @@
             <button id="btn-admin-refresh" class="btn" style="background:var(--secondary); color:white; font-size:0.8rem">LÀM MỚI 🔄</button>
             <button id="btn-export-excel" class="btn" style="background:var(--success); color:white; font-size:0.8rem">XUẤT EXCEL 📗</button>
         </div>
-        <div class="admin-table-container"><table class="admin-table"><thead><tr><th>Hạng</th><th>SBD</th><th>Họ tên</th><th>Lớp</th><th>Điểm</th><th>TG Làm</th><th>Ngày nộp</th><th>Xoá</th></tr></thead><tbody id="admin-list-body"></tbody></table></div>
+        <div class="admin-table-container">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>Hạng</th><th>SBD</th><th>Họ tên</th><th>Lớp</th><th>Chế độ</th><th>Điểm</th><th>TG Làm</th><th>Ngày nộp</th><th>Xoá</th>
+                    </tr>
+                </thead>
+                <tbody id="admin-list-body"></tbody>
+            </table>
+        </div>
     </section>
 
     <footer>
@@ -279,11 +319,11 @@
     </footer>
 </div>
 
-<!-- Modal xác thực admin -->
+<!-- Modal Admin -->
 <div id="admin-auth-modal" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:20000; display:none; justify-content:center; align-items:center;">
     <div class="card" style="width:100%; max-width:400px; text-align:center;">
         <h2 style="color: var(--primary)">Xác minh Quản trị</h2>
-        <input type="password" id="admin-pw" placeholder="Mật khẩu..." style="margin-bottom:20px;">
+        <input type="password" id="admin-pw" placeholder="Mật khẩu..." style="margin-bottom:20px;" oncopy="return false" oncut="return false" onpaste="return false">
         <div style="display:flex; gap:10px;">
             <button class="btn btn-gray" style="flex:1" id="btn-auth-cancel">HỦY</button>
             <button class="btn btn-fire" style="flex:1" id="btn-auth-confirm">XÁC NHẬN</button>
@@ -316,6 +356,24 @@ let currentUser = null, quizStartTime = 0, isQuizRunning = false, mode = '', cur
 const audioPing = new Audio('https://www.soundjay.com/buttons/sounds/button-16.mp3');
 const audioFinish = new Audio('https://www.soundjay.com/misc/sounds/bell-ringing-05.mp3');
 
+// KHÓA LỆNH COPY TOÀN CỤC
+document.addEventListener('copy', (e) => {
+    e.preventDefault();
+    return false;
+});
+
+// KHÓA PHÍM TẮT HỆ THỐNG
+document.addEventListener('keydown', (e) => {
+    if (
+        (e.ctrlKey && (e.key === 'c' || e.key === 'v' || e.key === 'x' || e.key === 'u' || e.key === 's')) ||
+        (e.ctrlKey && e.shiftKey && e.key === 'i') ||
+        e.key === 'F12'
+    ) {
+        e.preventDefault();
+        return false;
+    }
+}, true);
+
 signInAnonymously(auth).catch(e => console.error(e));
 onAuthStateChanged(auth, user => currentUser = user);
 
@@ -325,13 +383,7 @@ const QUESTION_BANK = {
         { q: "Trong hệ SI, đơn vị của điện trở là gì?", a: "Ohm ($\\Omega$)", o: ["Ampere (A)", "Volt (V)", "Ohm ($\\Omega$)", "Watt (W)"], e: "Ohm ($\\Omega$) là đơn vị chuẩn đo điện trở." },
         { q: "Nội dung định luật Ohm cho biết cường độ dòng điện chạy qua một dây dẫn", a: "tỉ lệ thuận với hiệu điện thế giữa hai đầu dây.", o: ["tỉ lệ thuận với điện trở.", "tỉ lệ nghịch với hiệu điện thế.", "tỉ lệ thuận với hiệu điện thế giữa hai đầu dây.", "không phụ thuộc vật liệu."], e: "Hệ thức $I = U/R$ cho thấy $I$ và $U$ tỉ lệ thuận." },
         { q: "Nếu hiệu điện thế $U$ tăng 3 lần thì cường độ dòng điện $I$ qua điện trở sẽ", a: "tăng lên 3 lần.", o: ["giảm 3 lần.", "tăng lên 3 lần.", "không đổi.", "tăng 9 lần."], e: "$I$ tỉ lệ thuận with $U$ theo định luật Ohm." },
-        { q: "Đồ thị biểu diễn mối quan hệ giữa $I$ and $U$ của một điện trở là", a: "một đường thẳng đi qua gốc tọa độ.", o: ["đường cong parabol.", "một đường thẳng đi qua gốc tọa độ.", "đường thẳng song song trục hoành.", "đường tròn."], e: "$I = (1/R) \\cdot U$ là phương trình đường thẳng qua gốc O." },
-        { q: "Công thức xác định điện trở của một dây dẫn hình trụ, đồng chất là", a: "$R = \\rho\\frac{l}{S}$", o: ["$R = \\rho\\frac{S}{l}$", "$R = \\rho\\frac{l}{S}$", "$R = \\frac{S}{\\rho l}$", "$R = \\frac{l}{\\rho S}$"], e: "Điện trở $R$ tỉ lệ thuận với chiều dài $l$ và tỉ lệ nghịch với tiết diện $S$." },
-        { q: "Dây dẫn $18\\Omega$ cắt làm 3 phần bằng nhau thì mỗi phần có điện trở là", a: "6 $\\Omega$", o: ["54 $\\Omega$", "6 $\\Omega$", "21 $\\Omega$", "15 $\\Omega$"], e: "$R$ tỉ lệ thuận với chiều dài $l$." },
-        { q: "Khi cùng đặt vào hiệu điện thế $U$ cho hai điện trở $R_1$ và $R_2$ với $R_1 = 3 R_2$. So sánh dòng điện?", a: "$I_2 = 3 I_1$", o: ["$I_1 = 3 I_2$", "$I_2 = 3 I_1$", "$I_1 = I_2$", "$I_1 = 9 I_2$"], e: "$I$ tỉ lệ nghịch với $R$." },
-        { q: "Đối với đoạn mạch gồm hai điện trở $R_1$ and $R_2$ mắc nối tiếp, hệ thức đúng là", a: "$R_{tđ} = R_1 + R_2$", o: ["$R_{tđ} = R_1 - R_2$", "$R_{tđ} = R_1 + R_2$", "$R_{tđ} = \\frac{R_1 R_2}{R_1 + R_2}$", "$\\frac{1}{R_{tđ}} = \\frac{1}{R_1} + \\frac{1}{R_2}$"], e: "Mạch nối tiếp có tổng trở bằng tổng điện trở thành phần." },
-        { q: "Đặt $U = 12V$ vào $R = 10\\Omega$. Cường độ dòng điện là", a: "1,2 A", o: ["1,2 A", "0,83 A", "120 A", "2 A"], e: "$I = U/R = 12/10 = 1,2$ A." },
-        { q: "Điện trở suất của một vật liệu được ký hiệu bằng chữ cái Hy Lạp nào?", a: "$\\rho$ (Rho)", o: ["$\\lambda$ (Lambda)", "$\\rho$ (Rho)", "$\\Omega$ (Ohm)", "$\\pi$ (Pi)"], e: "Ký hiệu chuẩn cho điện trở suất là $\\rho$." },
+        { q: "Đồ thị biểu diễn mối quan hệ giữa $I$ và $U$ của một điện trở là", a: "một đường thẳng đi qua gốc tọa độ.", o: ["parabol.", "một đường thẳng đi qua gốc tọa độ.", "đường thẳng song song trục hoành.", "đường tròn."], e: "$I = (1/R) \\cdot U$ là phương trình đường thẳng qua gốc O." },
         { q: "Hai dây sắt cùng dài $l$, dây 1 có $S_1 = 1mm^2$, dây 2 có $S_2 = 2mm^2$. So sánh điện trở?", a: "$R_1 = 2 R_2$", o: ["$R_1 = 2 R_2$", "$R_2 = 2 R_1$", "$R_1 = R_2$", "$R_1 = 4 R_2$"], e: "Điện trở tỉ lệ nghịch với tiết diện." }
     ],
     tf: [
@@ -340,35 +392,14 @@ const QUESTION_BANK = {
             { l: "b)", t: "Khi điện trở R tăng lên 2 lần và U giữ nguyên thì I tăng 2 lần.", a: false }, 
             { l: "c)", t: "Đơn vị của cường độ dòng điện I là Ampere (A).", a: true }, 
             { l: "d)", t: "Công thức của định luật Ohm là $I = U/R$.", a: true } 
-        ], e: "Theo định luật Ohm, cường độ dòng điện tỉ lệ nghịch với điện trở." },
-        { ctx: "Mắc nối tiếp điện trở $R_1 = 15\\Omega$ and biến trở $R$ vào nguồn $U = 9V$.", sts: [ 
-            { l: "a)", t: "Điện trở đoạn mạch có tác dụng cản trở dòng điện.", a: true }, 
-            { l: "b)", t: "Nếu điều chỉnh $R$ tăng lên thì dòng điện mạch chính sẽ giảm.", a: true }, 
-            { l: "c)", t: "Khi $R = 30\\Omega$, tổng trở mạch là $45\\Omega$.", a: true }, 
-            { l: "d)", t: "Dòng điện chạy qua $R_1$ lúc này là 0,2 A.", a: true } 
-        ], e: "Áp dụng định luật Ohm cho đoạn mạch nối tiếp." },
-        { ctx: "Cho ba điện trở $R_1=R_2=R_3=30\\Omega$ mắc song song vào nguồn $U=10V$.", sts: [ 
-            { l: "a)", t: "Điện trở tương đương của mạch bằng $10 \\Omega$.", a: true }, 
-            { l: "b)", t: "Cường độ dòng điện mạch chính là 1,0 A.", a: true }, 
-            { l: "c)", t: "Nếu tháo bớt một điện trở ra thì tổng trở mạch giảm.", a: false }, 
-            { l: "d)", t: "Dòng điện qua mỗi nhánh là 0,33 A.", a: true } 
-        ], e: "Tháo nhánh song song làm tổng trở tăng lên." },
-        { ctx: "Bản chất dòng điện chạy qua vật dẫn kim loại.", sts: [ 
-            { l: "a)", t: "Dòng điện là dòng dịch chuyển có hướng của các điện tích.", a: true }, 
-            { l: "b)", t: "Trong kim loại, các điện tích tự do là electron mang điện âm.", a: true }, 
-            { l: "c)", t: "Chiều quy ước của dòng điện là chiều từ cực âm sang cực dương.", a: false }, 
-            { l: "d)", t: "Electron dịch chuyển ngược chiều quy ước của dòng điện.", a: true } 
-        ], e: "Chiều dòng điện quy ước từ dương sang âm." }
+        ], e: "Theo định luật Ohm, cường độ dòng điện tỉ lệ nghịch với điện trở." }
     ],
     short: [
         { q: "Mắc đèn $24\\Omega$ vào nguồn $12V$. Tính cường độ dòng điện (A)?", a: "0,5", e: "Công thức: $I = \\frac{U}{R}$" },
-        { q: "Đặt hiệu điện thế $6V$ thì dòng điện qua dây là $0,1A$. Tính điện trở dây dẫn ($\\Omega$)?", a: "60", e: "Công thức: $R = \\frac{U}{I}$" },
-        { q: "Điện trở $40\\Omega$ chịu tối đa 0,5A. Hiệu điện thế tối đa là bao nhiêu Volt (V)?", a: "20", e: "Công thức: $U = I \\cdot R$" },
-        { q: "Dây 12 ohm bị kéo giãn dài gấp đôi (thể tích không đổi). Tính điện trở mới (ohm)?", a: "48", e: "Công thức: $R = \\rho\\frac{l}{S}$" }
+        { q: "Đặt hiệu điện thế $6V$ thì dòng điện qua dây là $0,1A$. Tính điện trở dây dẫn ($\\Omega$)?", a: "60", e: "Công thức: $R = \\frac{U}{I}$" }
     ]
 };
 
-// --- REALISTIC STYLIZED FIRE ANIMATION (5S) ---
 let fireRequest;
 function startFire() {
     const canvas = document.getElementById('fire-canvas');
@@ -428,7 +459,10 @@ const initGame = (m) => {
     const sbd = document.getElementById('user_sbd').value.trim();
     if(!name || !cls || !sbd) { document.getElementById('start-error').style.display = 'block'; window.scrollTo(0,0); return; }
     document.getElementById('start-error').style.display = 'none';
+    
     mode = m;
+    isQuizRunning = true; 
+    
     currentExam = [
         ...shuffle([...QUESTION_BANK.mcq]).slice(0, 12).map((q, i) => ({...q, id: `p1_${i}`, type: 'mcq', section: 'Phần I. Đa lựa chọn', displayNum: i+1})),
         ...shuffle([...QUESTION_BANK.tf]).slice(0, 4).map((q, i) => ({...q, id: `p2_${i}`, type: 'tf', section: 'Phần II. Đúng/Sai', displayNum: i+1})),
@@ -439,10 +473,11 @@ const initGame = (m) => {
     document.getElementById('wish-cheat-info').style.display = (mode === 'test') ? 'block' : 'none';
     startFire();
     if(mode === 'test') try { document.documentElement.requestFullscreen(); } catch(e) {}
+    
     setTimeout(() => {
+        if(document.getElementById('wish-overlay').style.display === 'none') return;
         document.getElementById('wish-overlay').style.display = 'none';
         cancelAnimationFrame(fireRequest);
-        isQuizRunning = true;
         document.getElementById('main-header').style.display = 'flex';
         showScreen('screen-quiz'); renderQuestion(); startTimer();
     }, 5000);
@@ -453,7 +488,8 @@ function renderQuestion() {
     const container = document.getElementById('quiz-content');
     const labels = ['A', 'B', 'C', 'D'];
     let html = `<div class="section-title">${q.section}</div><div class="card">`;
-    if(mode === 'practice') html += `<button class="btn-hint" id="hint-trigger">XEM GỢI Ý 💡</button><div id="hint-box" class="hint-box"><b>Hướng dẫn giải:</b> ${q.e}</div>`;
+    // FIXED: Khóa hiển thị bằng style="display: none;"
+    if(mode === 'practice') html += `<button class="btn-hint" id="hint-trigger">XEM GỢI Ý 💡</button><div id="hint-box" class="hint-box" style="display: none;"><b>Hướng dẫn giải:</b> ${q.e}</div>`;
     if(q.type === 'mcq') {
         html += `<h3>Câu ${q.displayNum}. ${q.q}</h3>`;
         if(!q.shuffledOptions) q.shuffledOptions = shuffle([...q.o]);
@@ -468,7 +504,7 @@ function renderQuestion() {
             html += `<div class="tf-row"><span style="flex:1"><b>${st.l}</b> ${st.t}</span><div style="display:flex; gap:10px;"><button class="tf-btn ${val===true?'active-t':''}" data-si="${si}" data-val="true">Đúng</button><button class="tf-btn ${val===false?'active-f':''}" data-si="${si}" data-val="false">Sai</button></div></div>`;
         });
     } else {
-        html += `<h3>Câu ${q.displayNum}. ${q.q}</h3><p style="color:var(--danger); font-size:0.75rem; font-weight:bold; margin:10px 0;">lưu ý: đáp án dưới 4 kí tự và sử dụng dấu "," trường hợp số thập phân</p><input type="text" id="short-input" value="${userAnswers[q.id]||''}" placeholder="Ví dụ: 0,5">`;
+        html += `<h3>Câu ${q.displayNum}. ${q.q}</h3><p style="color:var(--danger); font-size:0.75rem; font-weight:bold; margin:10px 0;">lưu ý: đáp án dưới 4 kí tự và sử dụng dấu "," trường hợp số thập phân</p><input type="text" id="short-input" value="${userAnswers[q.id]||''}" placeholder="Ví dụ: 0,5" oncopy="return false" oncut="return false" onpaste="return false">`;
     }
     container.innerHTML = html + `</div>`;
     if(q.type === 'mcq') {
@@ -482,8 +518,16 @@ function renderQuestion() {
         const inp = document.getElementById('short-input');
         if(inp) { inp.focus(); inp.oninput = (e) => userAnswers[q.id] = e.target.value; }
     }
+    
+    // Cải tiến logic Bật/Tắt Gợi ý
     const hb = document.getElementById('hint-trigger');
-    if(hb) hb.onclick = async () => { const b = document.getElementById('hint-box'); b.style.display = (b.style.display==='none'?'block':'none'); if(b.style.display==='block'&&window.MathJax) await MathJax.typesetPromise([b]); };
+    if(hb) hb.onclick = async () => {
+        const b = document.getElementById('hint-box');
+        const isHidden = b.style.display === 'none';
+        b.style.display = isHidden ? 'block' : 'none';
+        if(isHidden && window.MathJax) await MathJax.typesetPromise([b]);
+    };
+
     document.getElementById('btn-prev').style.visibility = currentIdx === 0 ? 'hidden' : 'visible';
     document.getElementById('btn-next').style.display = currentIdx === currentExam.length - 1 ? 'none' : 'block';
     document.getElementById('btn-finish').style.display = currentIdx === currentExam.length - 1 ? 'block' : 'none';
@@ -493,6 +537,8 @@ function renderQuestion() {
 async function calculateResult() {
     if(!isQuizRunning) return;
     isQuizRunning = false; clearInterval(timerInt); audioFinish.play().catch(()=>{});
+    document.getElementById('wish-overlay').style.display = 'none';
+    cancelAnimationFrame(fireRequest);
     const dur = Math.floor((Date.now() - quizStartTime) / 1000);
     let score = 0;
     const tfMap = {0:0, 1:0.0625, 2:0.125, 3:0.25, 4:0.5};
@@ -505,17 +551,23 @@ async function calculateResult() {
             score += tfMap[cp] || 0;
         } else if(q.type === 'short' && norm(userAnswers[q.id]||'') === norm(q.a)) score += 0.5;
     });
-    const fs = parseFloat(Math.min(7, score).toFixed(1));
+    const fs = parseFloat(Math.min(10, score).toFixed(1));
     showScreen('screen-result'); document.getElementById('main-header').style.display = 'none';
     document.getElementById('final-score').innerText = fs.toFixed(1);
     document.getElementById('res-name').innerText = document.getElementById('username').value.toUpperCase();
     document.getElementById('res-meta').innerText = `Lớp ${document.getElementById('user_class').value} | SBD ${document.getElementById('user_sbd').value}`;
     let rb = document.getElementById('rank-badge'), txt = 'CHƯA ĐẠT', col = '#64748b';
-    if(fs >= 6) { txt='XUẤT SẮC'; col='#f59e0b'; } else if(fs >= 5) { txt='GIỎI'; col='#10b981'; } else if(fs >= 4) { txt='KHÁ'; col='#3b82f6'; } else if(fs >= 3) { txt='ĐẠT'; col='#8b5cf6'; }
+    if(fs >= 9) { txt='XUẤT SẮC'; col='#f59e0b'; } else if(fs >= 8) { txt='GIỎI'; col='#10b981'; } else if(fs >= 6.5) { txt='KHÁ'; col='#3b82f6'; } else if(fs >= 5) { txt='ĐẠT'; col='#8b5cf6'; }
     rb.innerText = txt; rb.style.background = col;
     if(fs >= 5) confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+
     if(currentUser) {
-        try { await addDoc(collection(db, 'artifacts', appId_fixed, 'public', 'data', collectionName), { name: document.getElementById('username').value, sbd: document.getElementById('user_sbd').value || '?', class: document.getElementById('user_class').value || '?', score: fs, duration: dur, timestamp: new Date().toISOString() }); } catch(e) {}
+        try { 
+            await addDoc(collection(db, 'artifacts', appId_fixed, 'public', 'data', collectionName), { 
+                name: document.getElementById('username').value, sbd: document.getElementById('user_sbd').value || '?', class: document.getElementById('user_class').value || '?', 
+                score: fs, duration: dur, mode: mode, timestamp: new Date().toISOString() 
+            }); 
+        } catch(e) { console.error(e); }
     }
     fetchRankAndLeaderboard(fs);
     if (document.fullscreenElement) { document.exitFullscreen().catch(()=>{}); }
@@ -525,36 +577,55 @@ async function fetchRankAndLeaderboard(myScore) {
     try {
         const snap = await getDocs(collection(db, 'artifacts', appId_fixed, 'public', 'data', collectionName));
         let list = []; snap.forEach(d => list.push(d.data()));
+        list = list.filter(r => (r.mode === 'test' || !r.mode));
         list.sort((a,b) => b.score - a.score || a.duration - b.duration);
         const myRank = list.findIndex(r => r.name === document.getElementById('username').value && r.score === myScore) + 1;
-        document.getElementById('my-rank-text').innerText = `HẠNG ${myRank} / ${list.length}`;
+        if(myRank > 0) document.getElementById('my-rank-text').innerText = `HẠNG ${myRank} / ${list.length}`;
+        else document.getElementById('my-rank-text').innerText = (mode==='practice') ? `KẾT QUẢ LUYỆN TẬP` : `HẠNG ...`;
     } catch (e) {}
 }
 
 async function renderAdmin() {
     const listBody = document.getElementById('admin-list-body'), statsBox = document.getElementById('admin-stats');
-    listBody.innerHTML = "<tr><td colspan='8'>Đang tải dữ liệu...</td></tr>";
+    listBody.innerHTML = "<tr><td colspan='9'>Đang tải dữ liệu...</td></tr>";
     try {
         const snap = await getDocs(collection(db, 'artifacts', appId_fixed, 'public', 'data', collectionName));
-        let data = []; snap.forEach(d => data.push({id: d.id, ...d.data()}));
-        const classes = [...new Set(data.map(i => i.class))].sort();
-        const fSelect = document.getElementById('admin-filter-class');
-        const oldVal = fSelect.value;
-        fSelect.innerHTML = '<option value="all">Tất cả lớp</option>' + classes.map(c => `<option value="${c}" ${c===oldVal?'selected':''}>Lớp ${c}</option>`).join('');
-        if(fSelect.value !== 'all') data = data.filter(i => i.class === fSelect.value);
+        let rawData = []; snap.forEach(d => rawData.push({id: d.id, ...d.data()}));
+        
+        const classes = [...new Set(rawData.map(i => i.class))].sort();
+        const fClass = document.getElementById('admin-filter-class');
+        const oldC = fClass.value;
+        fClass.innerHTML = '<option value="all">Tất cả lớp</option>' + classes.map(c => `<option value="${c}" ${c===oldC?'selected':''}>Lớp ${c}</option>`).join('');
+        
+        const mFilter = document.getElementById('admin-filter-mode').value;
         const sVal = document.getElementById('admin-sort').value;
+
+        let data = rawData.filter(i => {
+            const matchMode = (mFilter === 'all') || (i.mode === mFilter) || (mFilter === 'test' && !i.mode);
+            const matchClass = (fClass.value === 'all') || (i.class === fClass.value);
+            return matchMode && matchClass;
+        });
+
         data.sort((a,b) => {
             if(sVal === 'score_desc') return b.score - a.score || a.duration - b.duration;
             if(sVal === 'date_new') return new Date(b.timestamp) - new Date(a.timestamp);
-            if(sVal === 'duration_fast') return a.duration - b.duration;
+            if(sVal === 'duration_fast') return a.duration - b.duration || b.score - a.score;
             return 0;
         });
+
         let s = { xs: 0, g: 0, k: 0, d: 0, cd: 0 };
-        data.forEach(i => { if(i.score >= 6) s.xs++; else if(i.score >= 5) s.g++; else if(i.score >= 4) s.k++; else if(i.score >= 3) s.d++; else s.cd++; });
+        data.forEach(i => { if(i.score >= 9) s.xs++; else if(i.score >= 8) s.g++; else if(i.score >= 6.5) s.k++; else if(i.score >= 5) s.d++; else s.cd++; });
         statsBox.innerHTML = `<div class="stat-box"><b>${s.xs}</b><br><small>X.Sắc</small></div><div class="stat-box"><b>${s.g}</b><br><small>Giỏi</small></div><div class="stat-box"><b>${s.k}</b><br><small>Khá</small></div><div class="stat-box"><b>${s.d}</b><br><small>Đạt</small></div><div class="stat-box" style="border-color:red"><b>${s.cd}</b><br><small>C.Đạt</small></div>`;
-        listBody.innerHTML = data.map((i, idx) => `<tr><td>${idx+1}</td><td>${i.sbd}</td><td>${i.name}</td><td>${i.class}</td><td><b>${(i.score||0).toFixed(1)}</b></td><td>${i.duration}s</td><td>${new Date(i.timestamp).toLocaleDateString()}</td><td><button style="background:red; color:white; border:none; padding:3px 8px; border-radius:4px; cursor:pointer" class="btn-del" data-id="${i.id}">X</button></td></tr>`).join('');
+        
+        listBody.innerHTML = data.map((i, idx) => `
+            <tr>
+                <td>${idx+1}</td><td>${i.sbd}</td><td>${i.name}</td><td>${i.class}</td>
+                <td><span class="badge-mode ${i.mode === 'practice' ? 'badge-practice' : 'badge-test'}">${i.mode === 'practice' ? 'Luyện tập' : 'Kiểm tra'}</span></td>
+                <td><b>${(i.score||0).toFixed(1)}</b></td><td>${i.duration}s</td><td>${new Date(i.timestamp).toLocaleDateString()}</td>
+                <td><button style="background:red; color:white; border:none; padding:3px 8px; border-radius:4px; cursor:pointer" class="btn-del" data-id="${i.id}">X</button></td>
+            </tr>`).join('');
         listBody.querySelectorAll('.btn-del').forEach(b => b.onclick = () => deleteEntry(b.dataset.id));
-    } catch(e) { listBody.innerHTML = "<tr><td colspan='8'>Lỗi kết nối Firebase.</td></tr>"; }
+    } catch(e) { listBody.innerHTML = "<tr><td colspan='9'>Lỗi kết nối Firebase.</td></tr>"; }
 }
 
 async function deleteEntry(id) { if(confirm("Xóa kết quả này?")) { await deleteDoc(doc(db, 'artifacts', appId_fixed, 'public', 'data', collectionName, id)); renderAdmin(); } }
@@ -574,16 +645,18 @@ document.getElementById('btn-modal-cancel').onclick = () => document.getElementB
 document.getElementById('btn-modal-confirm').onclick = () => { document.getElementById('confirm-finish-modal').style.display = 'none'; calculateResult(); };
 document.getElementById('btn-admin-close').onclick = () => { document.getElementById('main-header').style.display = 'none'; showScreen('screen-start'); };
 document.getElementById('btn-admin-refresh').onclick = () => renderAdmin();
+document.getElementById('admin-sort').onchange = () => renderAdmin();
+document.getElementById('admin-filter-mode').onchange = () => renderAdmin();
+document.getElementById('admin-filter-class').onchange = () => renderAdmin();
 document.getElementById('btn-cheat-submit').onclick = () => { document.getElementById('cheat-modal').style.display = 'none'; calculateResult(); };
 
 document.getElementById('btn-view-review').onclick = () => {
     const area = document.getElementById('review-area'), content = document.getElementById('review-content'), labels = ['A', 'B', 'C', 'D'];
-    area.style.display = 'block'; 
-    let h = '';
+    area.style.display = 'block'; let h = '';
     currentExam.forEach(q => {
         const norm = (s) => (s || "").toString().trim().replace(',','.');
-        let qTitleText = q.type === 'tf' ? `Câu ${q.displayNum} (Đúng/Sai)` : `Câu ${q.displayNum}. ${q.q}`;
-        h += `<div class="card" style="border-left: 8px solid var(--primary)"><h3>${qTitleText}</h3>`;
+        let qText = q.type === 'tf' ? `Câu ${q.displayNum} (Đúng/Sai)` : `Câu ${q.displayNum}. ${q.q}`;
+        h += `<div class="card" style="border-left: 8px solid var(--primary)"><h3>${qText}</h3>`;
         if(q.type === 'mcq') {
             (q.shuffledOptions || q.o).forEach((o, idx) => {
                 const isC = norm(o) === norm(q.a), isU = userAnswers[q.id] === o;
@@ -606,8 +679,7 @@ document.getElementById('btn-view-review').onclick = () => {
     const target = document.getElementById('review-heading');
     if (target) {
         setTimeout(() => {
-            const yOffset = -20; 
-            const y = target.getBoundingClientRect().top + window.pageYOffset + yOffset;
+            const y = target.getBoundingClientRect().top + window.pageYOffset - 20;
             window.scrollTo({ top: y, behavior: 'smooth' });
             if(window.MathJax) MathJax.typesetPromise([content]);
         }, 150);
@@ -624,7 +696,8 @@ document.getElementById('btn-export-excel').onclick = async () => {
 function showScreen(id) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); document.getElementById(id).classList.add('active'); }
 function shuffle(a) { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
 function startTimer() { clearInterval(timerInt); timerInt = setInterval(() => { timeLeft--; const m = Math.floor(timeLeft/60), s = timeLeft%60, el = document.getElementById('timer'); if(el) el.innerText = `${m}:${s.toString().padStart(2,'0')}`; if(timeLeft <= 0) calculateResult(); }, 1000); }
-const triggerCheat = () => { if (isQuizRunning && mode === 'test') { document.getElementById('cheat-modal').style.display = 'flex'; calculateResult(); } };
+
+const triggerCheat = () => { if (isQuizRunning && mode === 'test') { calculateResult(); document.getElementById('cheat-modal').style.display = 'flex'; } };
 document.addEventListener('fullscreenchange', () => { if (!document.fullscreenElement && isQuizRunning && mode === 'test') triggerCheat(); });
 document.addEventListener('visibilitychange', () => { if(document.visibilityState === 'hidden') triggerCheat(); });
 window.addEventListener('blur', triggerCheat);
